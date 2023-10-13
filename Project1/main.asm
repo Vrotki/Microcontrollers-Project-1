@@ -29,9 +29,14 @@ start:
 	CBI PORTE, 4; clear PE4
 
 	;configure all PD bits to send output to LED's
-	OUT DDRD, 0b11111111; set all PD bits to output
-	OUT PORTD, COUNT; set PORTD to initial count
+	LDI R17, 0b11111111
+	OUT DDRD, R17; set all PD bits to output
+	OUT PORTD, R16; set PORTD to initial count
 
+	MAIN_LOOP: CALL INC_COUNT
+		RJMP MAIN_LOOP
+		
+		
 	;main loop:
 		;monitor PINC, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
 		;monitor PINC, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
@@ -43,3 +48,9 @@ start:
 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
 ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
 ; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.
+
+.ORG 400
+INC_COUNT: RET
+
+.ORG 500
+DEC_COUNT: RET
