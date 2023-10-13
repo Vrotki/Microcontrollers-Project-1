@@ -42,19 +42,19 @@ start:
 		MOV R21, R19; copies current buttons pressed values to R21 for comparison
 		
 		;monitor PINC, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
+		LSR R20; shifts positive key previous pressed to carry bit
+		BRLO POSITIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
 		LSR R21; shifts positive key current pressed to carry bit
 		BRSH POSITIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
-		LSR R22; shifts positive key previous pressed to carry bit
-		BRLO POSITIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
 		
 		CALL INC_COUNT; increment if button was being pressed and is no longer being pressed
 		POSITIVE_NOT_RELEASED:
 
 		;monitor PINC, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
+		LSR R20; shifts negative key previous pressed to carry bit
+		BRLO NEGATIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
 		LSR R21; shifts negative key current pressed to carry bit
 		BRSH NEGATIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
-		LSR R22; shifts negative key previous pressed to carry bit
-		BRLO NEGATIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
 		
 		CALL DEC_COUNT; decrement if button was being pressed and is no longer being pressed
 		NEGATIVE_NOT_RELEASED:
