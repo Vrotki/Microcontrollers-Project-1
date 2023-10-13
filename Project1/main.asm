@@ -20,21 +20,17 @@ start:
 	;configure PA0 and PA1 to take input from buttons, with pull-up enabled
 	CBI DDRA, 0; set PA0 to input
 	SBI PORTC, 0; pull-up PA0
-	CBI PINC, 0; clear PA0
 
 	CBI DDRA, 1; set PA1 to input
 	SBI PORTC, 1; pull-up PA1
-	CBI PINC, 1; clear PA1
 
 	;configure PE4 to send output to speaker
 	SBI DDRE, 4; set PE4 to output
 	CBI PORTE, 4; clear PE4
-	CBI PINE, 4; clear PE4 input, not used
 
 	;configure all PD bits to send output to LED's
 	OUT DDRD, 0b11111111; set all PD bits to output
 	OUT PORTD, COUNT; set PORTD to initial count
-	OUT PIND, 0b00000000; clear all PD input, not used
 
 	;main loop:
 		;monitor PINC, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
