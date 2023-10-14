@@ -65,6 +65,17 @@ INC_COUNT: RET
 .ORG 500
 DEC_COUNT: RET
 
+.ORG 0x600
+Delay: LDI R23, 250       ;8004 MCs 1 + 250(1 + 7(1 + 1 + 2) - 1 + 1 + 1 + 2) - 1 + 4   
+	Loop1: LDI R24, 7		
+		Loop2:	NOP			 
+			DEC R23
+			BRNE Loop2
+		NOP
+		DEC R24
+		BRNE Loop1
+	RET
+
 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
 ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
 ; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.
