@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Fri Oct 13 17:37:57 2023
+AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Fri Oct 13 19:41:11 2023
 
 
 EQU  SIGNATURE_000 0000001e
@@ -1191,5 +1191,8 @@ EQU  USART2_STARTaddr 00000064
 EQU  INT_VECTORS_SIZE 00000066
 CSEG start        00000000
 EQU  COUNT        00000000
-CSEG MAIN_LOOP    0000000a
+CSEG MAIN_LOOP    0000000c
+CSEG POSITIVE_NOT_RELEASED 00000015
 CSEG INC_COUNT    00000190
+CSEG NEGATIVE_NOT_RELEASED 0000001b
+CSEG DEC_COUNT    000001f4

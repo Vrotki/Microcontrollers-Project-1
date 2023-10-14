@@ -22,8 +22,11 @@
   <FILE>Project1.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <start><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>10</LINE></start>
-  <MAIN_LOOP><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>36</LINE></MAIN_LOOP>
-  <INC_COUNT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>53</LINE></INC_COUNT>
+  <start><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>1</LINE></start>
+  <MAIN_LOOP><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>30</LINE></MAIN_LOOP>
+  <POSITIVE_NOT_RELEASED><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>42</LINE></POSITIVE_NOT_RELEASED>
+  <INC_COUNT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>63</LINE></INC_COUNT>
+  <NEGATIVE_NOT_RELEASED><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>51</LINE></NEGATIVE_NOT_RELEASED>
+  <DEC_COUNT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>66</LINE></DEC_COUNT>
  </LABELS>
 </ASSEMBLER_INFO>

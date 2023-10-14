@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Fri Oct 13 17:37:57 2023
+AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Fri Oct 13 19:41:11 2023
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
                                  
-                                 ;
+                                 start:
                                  
                                  
                                  ;*************************************************************************
@@ -1619,15 +1619,6 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  
                                  
-                                 ; Project1.asm
-                                 ;
-                                 ; Created: 10/10/2023 10:57:08 AM
-                                 ; Author : vikto
-                                 ;
-                                 
-                                 
-                                 ; Replace with your application code
-                                 start:
                                  	.ORG 0
                                  	.EQU COUNT = 0
 000000 e000                      	LDI R16, COUNT
@@ -1639,10 +1630,10 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  	;configure PA0 and PA1 to take input from buttons, with pull-up enabled
 000001 9808                      	CBI DDRA, 0; set PA0 to input
-000002 9a40                      	SBI PORTC, 0; pull-up PA0
+000002 9a10                      	SBI PORTA, 0; pull-up PA0
                                  
 000003 9809                      	CBI DDRA, 1; set PA1 to input
-000004 9a41                      	SBI PORTC, 1; pull-up PA1
+000004 9a11                      	SBI PORTA, 1; pull-up PA1
                                  
                                  	;configure PE4 to send output to speaker
 000005 9a6c                      	SBI DDRE, 4; set PE4 to output
@@ -1653,24 +1644,50 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 000008 b91a                      	OUT DDRD, R17; set all PD bits to output
 000009 b90b                      	OUT PORTD, R16; set PORTD to initial count
                                  
-00000a 940e 0190                 	MAIN_LOOP: CALL INC_COUNT
-00000c cffd                      		RJMP MAIN_LOOP
+00000a ef2f                      	LDI R18, 0b11111111; set previous buttons to not pressed
+00000b ef3f                      	LDI R19, 0b11111111; set current buttons to not pressed
+                                 
+                                 	MAIN_LOOP:
+00000c 2f42                      		MOV R20, R18; copies previous buttons pressed values to R20 for comparison
+00000d b130                      		IN R19, PINA; set R19 to current buttons pressed
+00000e 2f53                      		MOV R21, R19; copies current buttons pressed values to R21 for comparison
                                  		
-                                 		
-                                 	;main loop:
                                  		;monitor PINC, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
+00000f 9546                      		LSR R20; shifts positive key previous pressed to carry bit
+000010 f020                      		BRLO POSITIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
+000011 9556                      		LSR R21; shifts positive key current pressed to carry bit
+000012 f410                      		BRSH POSITIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
+                                 		
+000013 940e 0190                 		CALL INC_COUNT; increment if button was being pressed and is no longer being pressed
+                                 		POSITIVE_NOT_RELEASED:
+                                 
                                  		;monitor PINC, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
+000015 9546                      		LSR R20; shifts negative key previous pressed to carry bit
+000016 f020                      		BRLO NEGATIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
+000017 9556                      		LSR R21; shifts negative key current pressed to carry bit
+000018 f410                      		BRSH NEGATIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
+                                 		
+000019 940e 01f4                 		CALL DEC_COUNT; decrement if button was being pressed and is no longer being pressed
+                                 		NEGATIVE_NOT_RELEASED:
+                                 
+00001b 2f23                      		MOV R18, R19; moves current buttons pressed to previous buttons pressed
                                  
                                  		;if counter moved past 0 or 30, send 1000 HZ square wave to PE4 for some amount of time
                                  
                                  		;display LED's for 000xxxxx counter value by setting PORTD to the counter value
+00001c b90b                      		OUT PORTD, R16
+                                 
+00001d cfee                      		RJMP MAIN_LOOP
+                                 
+                                 .ORG 400
+000190 9508                      INC_COUNT: RET
+                                 
+                                 .ORG 500
+0001f4 9508                      DEC_COUNT: RET
                                  
                                  ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
                                  ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
                                  ; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.
-                                 
-                                 .ORG 400
-000190 9508                      INC_COUNT: RET
 
 
 RESOURCE USE INFORMATION
@@ -1690,37 +1707,37 @@ counted separately from r26..r31 here.
 "ATmega324PB" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:   2 r17:   2 r18:   0 r19:   0 r20:   0 
-r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
+r13:   0 r14:   0 r15:   0 r16:   3 r17:   2 r18:   3 r19:   4 r20:   3 
+r21:   3 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   0 r31:   0 
-Registers used: 2 out of 35 (5.7%)
+Registers used: 6 out of 35 (17.1%)
 
 "ATmega324PB" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
-brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   0 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   1 cbi   :   3 cbr   :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   2 brlt  :   0 brmi  :   0 
+brne  :   0 brpl  :   0 brsh  :   2 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   2 cbi   :   3 cbr   :   0 
 clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
 cpi   :   0 cpse  :   0 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   0 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :   2 lds   :   0 lpm   :   0 lsl   :   0 
-lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   2 pop   :   0 
-push  :   0 rcall :   0 ret   :   1 reti  :   0 rjmp  :   1 rol   :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   0 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :   4 lds   :   0 lpm   :   0 lsl   :   0 
+lsr   :   4 mov   :   3 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   3 pop   :   0 
+push  :   0 rcall :   0 ret   :   2 reti  :   0 rjmp  :   1 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   3 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 7 out of 113 (6.2%)
+Instructions used: 12 out of 113 (10.6%)
 
 "ATmega324PB" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000322     28      0     28   32768   0.1%
+[.cseg] 0x000000 0x0003ea     64      0     64   32768   0.2%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

@@ -1,12 +1,3 @@
-;
-; Project1.asm
-;
-; Created: 10/10/2023 10:57:08 AM
-; Author : vikto
-;
-
-
-; Replace with your application code
 start:
 	.ORG 0
 	.EQU COUNT = 0
@@ -19,7 +10,7 @@ start:
 
 	;configure PA0 and PA1 to take input from buttons, with pull-up enabled
 	CBI DDRA, 0; set PA0 to input
-	SBI PORTC, 0; pull-up PA0
+	SBI PORTA, 0; pull-up PA0
 
 	CBI DDRA, 1; set PA1 to input
 	SBI PORTA, 1; pull-up PA1
@@ -36,7 +27,7 @@ start:
 	LDI R18, 0b11111111; set previous buttons to not pressed
 	LDI R19, 0b11111111; set current buttons to not pressed
 
-	MAIN_LOOP: CALL INC_COUNT
+	MAIN_LOOP:
 		MOV R20, R18; copies previous buttons pressed values to R20 for comparison
 		IN R19, PINA; set R19 to current buttons pressed
 		MOV R21, R19; copies current buttons pressed values to R21 for comparison
@@ -64,6 +55,7 @@ start:
 		;if counter moved past 0 or 30, send 1000 HZ square wave to PE4 for some amount of time
 
 		;display LED's for 000xxxxx counter value by setting PORTD to the counter value
+		OUT PORTD, R16
 
 		RJMP MAIN_LOOP
 
