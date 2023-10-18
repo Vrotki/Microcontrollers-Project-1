@@ -7,13 +7,11 @@ start:
 	; - if using 2x4, PD0 goes to LED1, PD1 goes to LED2, PD2 goes to LED3, PD3 goes to LED4B, and PD4 goes to LED6B
 
 	LDI R16, 0; counter
-
 	;configure PA0 and PA1 to take input from buttons, with pull-up enabled
-	CBI DDRA, 0; set PA0 to input
-	SBI PORTA, 0; pull-up PA0
-
-	CBI DDRA, 1; set PA1 to input
-	SBI PORTA, 1; pull-up PA1
+	LDI R17, 0x00
+	OUT DDRA, R17; set PA to input
+	LDI R17, 0xFF
+	OUT PORTA, R17; pull-up PA
 
 	;configure PE4 to send output to speaker
 	SBI DDRE, 4; set PE4 to output
@@ -31,13 +29,12 @@ start:
 		MOV R20, R18; copies previous buttons pressed values to R20 for comparison
 		IN R19, PINA; set R19 to current buttons pressed
 		MOV R21, R19; copies current buttons pressed values to R21 for comparison
-		
+
 		;monitor PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
 		LSR R20; shifts positive key previous pressed to carry bit
 		BRLO FINISH_POSITIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
 		LSR R21; shifts positive key current pressed to carry bit
 		BRSH POSITIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
-		
 		CALL INC_COUNT; increment if button was being pressed and is no longer being pressed
 		POSITIVE_NOT_RELEASED:
 
@@ -70,7 +67,24 @@ start:
 
 .ORG 400
 INC_COUNT:
-	INC R16 
+	INC R16
+	LDI R31, 0xFF
+	a: DEC R31
+		LDI R30, 0xFF
+	b: DEC R30
+		LDI R29, 0xFF
+	c: DEC R29
+		LDI R28, 0xFF
+	d: DEC R28
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		BRNE d
+		BRNE c
+		BRNE b 
+		BRNE a
 	RET
 
 .ORG 500
