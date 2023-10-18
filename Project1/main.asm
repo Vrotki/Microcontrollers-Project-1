@@ -1,12 +1,12 @@
 start:
 	.ORG 0
-	.EQU COUNT = 0
-	LDI R16, COUNT
 	;button 1 sends input to PA0, active low
 	;button 2 sends input to PA1, active low
 	;PE4 sends output to speaker, active high(?)
 	;LED's can be in 3x3 or 2x4 pattern, based on a switch on the board
 	; - if using 2x4, PD0 goes to LED1, PD1 goes to LED2, PD2 goes to LED3, PD3 goes to LED4B, and PD4 goes to LED6B
+
+	LDI R16, 0; counter
 
 	;configure PA0 and PA1 to take input from buttons, with pull-up enabled
 	CBI DDRA, 0; set PA0 to input
@@ -32,18 +32,19 @@ start:
 		IN R19, PINA; set R19 to current buttons pressed
 		MOV R21, R19; copies current buttons pressed values to R21 for comparison
 		
-		;monitor PINC, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
+		;monitor PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
 		LSR R20; shifts positive key previous pressed to carry bit
-		BRLO POSITIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
+		BRLO FINISH_POSITIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
 		LSR R21; shifts positive key current pressed to carry bit
 		BRSH POSITIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
 		
 		CALL INC_COUNT; increment if button was being pressed and is no longer being pressed
 		POSITIVE_NOT_RELEASED:
 
-		;monitor PINC, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
+		;monitor PINA, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
 		LSR R20; shifts negative key previous pressed to carry bit
-		BRLO NEGATIVE_NOT_RELEASED; branch if c == 1 - skip if button was not being pressed
+		BRLO FINISH_NEGATIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
+								  ; while DEC_COUNT needs to be skipped, subsequent buttons will only work if R21 is also shifted
 		LSR R21; shifts negative key current pressed to carry bit
 		BRSH NEGATIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
 		
@@ -54,16 +55,28 @@ start:
 
 		;if counter moved past 0 or 30, send 1000 HZ square wave to PE4 for some amount of time
 
-		;display LED's for 000xxxxx counter value by setting PORTD to the counter value
+		;display LED's for 000xxxxx counter value by setting PORTD to complement of the counter value
+		COM R16
 		OUT PORTD, R16
+		COM R16
 
 		RJMP MAIN_LOOP
+	FINISH_POSITIVE_SHIFT:
+		LSR R21
+		RJMP POSITIVE_NOT_RELEASED
+	FINISH_NEGATIVE_SHIFT:
+		LSR R21
+		RJMP NEGATIVE_NOT_RELEASED
 
 .ORG 400
-INC_COUNT: RET
+INC_COUNT:
+	INC R16 
+	RET
 
 .ORG 500
-DEC_COUNT: RET
+DEC_COUNT:
+	DEC R16
+	RET
 
 .ORG 0x600
 Delay: LDI R23, 250       ;8004 MCs 1 + 250(1 + 7(1 + 1 + 2) - 1 + 1 + 1 + 2) - 1 + 4   
