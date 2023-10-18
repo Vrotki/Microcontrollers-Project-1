@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Wed Oct 18 18:05:37 2023
+AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Wed Oct 18 18:18:41 2023
 
 
 EQU  SIGNATURE_000 0000001e
@@ -1197,10 +1197,7 @@ CSEG INC_COUNT    00000190
 CSEG FINISH_NEGATIVE_SHIFT 00000022
 CSEG NEGATIVE_NOT_RELEASED 0000001b
 CSEG DEC_COUNT    000001f4
-CSEG a            00000192
-CSEG b            00000194
-CSEG c            00000196
-CSEG d            00000198
-CSEG Delay        00000600
-CSEG Loop1        00000601
-CSEG Loop2        00000602
+CSEG DELAY        00000600
+CSEG a            00000601
+CSEG b            00000602
+CSEG c            00000603
