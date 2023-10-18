@@ -68,23 +68,7 @@ start:
 .ORG 400
 INC_COUNT:
 	INC R16
-	LDI R31, 0xFF
-	a: DEC R31
-		LDI R30, 0xFF
-	b: DEC R30
-		LDI R29, 0xFF
-	c: DEC R29
-		LDI R28, 0xFF
-	d: DEC R28
-		NOP
-		NOP
-		NOP
-		NOP
-		NOP
-		BRNE d
-		BRNE c
-		BRNE b 
-		BRNE a
+	CALL DELAY
 	RET
 
 .ORG 500
@@ -93,15 +77,22 @@ DEC_COUNT:
 	RET
 
 .ORG 0x600
-Delay: LDI R23, 250       ;8004 MCs 1 + 250(1 + 7(1 + 1 + 2) - 1 + 1 + 1 + 2) - 1 + 4   
-	Loop1: LDI R24, 7		
-		Loop2:	NOP			 
-			DEC R23
-			BRNE Loop2
+DELAY:  LDI R31, 0xFF
+	a:  LDI R30, 0xFF
+
+	b:  LDI R29, 0xFF
+
+	c:  NOP
 		NOP
-		DEC R24
-		BRNE Loop1
-	RET
+		DEC R29
+		BRNE c
+
+		DEC R30
+		BRNE b 
+
+		DEC R31
+		BRNE a
+		RET
 
 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
 ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
