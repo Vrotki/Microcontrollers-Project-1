@@ -23,16 +23,16 @@
  </OUTPUT_FILES>
  <LABELS>
   <start><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>1</LINE></start>
-  <MAIN_LOOP><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>28</LINE></MAIN_LOOP>
-  <FINISH_POSITIVE_SHIFT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>62</LINE></FINISH_POSITIVE_SHIFT>
-  <POSITIVE_NOT_RELEASED><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>40</LINE></POSITIVE_NOT_RELEASED>
-  <INC_COUNT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>70</LINE></INC_COUNT>
-  <FINISH_NEGATIVE_SHIFT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>65</LINE></FINISH_NEGATIVE_SHIFT>
-  <NEGATIVE_NOT_RELEASED><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>50</LINE></NEGATIVE_NOT_RELEASED>
-  <DEC_COUNT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>76</LINE></DEC_COUNT>
-  <DELAY><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>82</LINE></DELAY>
-  <a><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>83</LINE></a>
-  <b><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>85</LINE></b>
-  <c><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>87</LINE></c>
+  <MAIN_LOOP><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>33</LINE></MAIN_LOOP>
+  <FINISH_POSITIVE_SHIFT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>67</LINE></FINISH_POSITIVE_SHIFT>
+  <POSITIVE_NOT_RELEASED><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>45</LINE></POSITIVE_NOT_RELEASED>
+  <INC_COUNT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>75</LINE></INC_COUNT>
+  <FINISH_NEGATIVE_SHIFT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>70</LINE></FINISH_NEGATIVE_SHIFT>
+  <NEGATIVE_NOT_RELEASED><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>55</LINE></NEGATIVE_NOT_RELEASED>
+  <DEC_COUNT><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>81</LINE></DEC_COUNT>
+  <DELAY><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>87</LINE></DELAY>
+  <a><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>88</LINE></a>
+  <b><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>90</LINE></b>
+  <c><FILE>C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm</FILE><LINE>92</LINE></c>
  </LABELS>
 </ASSEMBLER_INFO>

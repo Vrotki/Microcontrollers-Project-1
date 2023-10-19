@@ -1,5 +1,10 @@
 start:
 	.ORG 0
+	LDI R16, HIGH(RAMEND);set up stack pointer
+	OUT SPH, R16
+	LDI R16, LOW(RAMEND)
+	OUT SPL, R16
+
 	;button 1 sends input to PA0, active low
 	;button 2 sends input to PA1, active low
 	;PE4 sends output to speaker, active high(?)
