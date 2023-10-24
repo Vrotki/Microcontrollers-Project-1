@@ -30,6 +30,17 @@ start:
 	LDI R18, 0b11111111; set previous buttons to not pressed
 	LDI R19, 0b11111111; set current buttons to not pressed
 
+	; Configure registers for individual features
+
+	;Viktor Butkovich individual feature - when the 3rd button is pressed, toggle a timer than, when activated, increments the counter by 1 every second
+	;Feature requires timer 0, button SW3, and the R2, R3, and R4 registers, along with temporarily using the R25 register but not needing to keep any values stored there
+	LDI R25, -125; calculated that a delay of 0.02 seconds would require a 156.25 clock cycle timer - based on testing, 125 clock cycles achieves timing closer to the desired result
+	MOV R2, R2;
+	LDI R25, 0
+	MOV R3, R25; timer feature enable - R3 is set to 0x00 is off, and 0xFF when it is on
+	MOV R4, R25; R4 is loop counter
+	
+
 	MAIN_LOOP:
 		MOV R20, R18; copies previous buttons pressed values to R20 for comparison
 		IN R19, PINA; set R19 to current buttons pressed
@@ -54,6 +65,20 @@ start:
 		CALL DEC_COUNT; decrement if button was being pressed and is no longer being pressed
 		NEGATIVE_NOT_RELEASED:
 
+		; Detect button releases for individual features
+		LSR R20
+		BRLO FINISH_TIMER_SHIFT; 
+		LSR R21
+		BRSH TIMER_NOT_RELEASED
+		COM R3; toggle timer enable
+		SBRC R3, 0; if timer not enabled (if R3 bit 0 is 0), skip
+		RCALL VIKTOR_ENABLE_TIMER; if timer just enabled, start timer loop
+		TIMER_NOT_RELEASED:
+
+		; Update any timers
+		SBRC R3, 0; if timer not enabled (if R3 bit 0 is 0), skip
+		RCALL VIKTOR_UPDATE_TIMER; if timer enabled, update timer
+
 		MOV R18, R19; moves current buttons pressed to previous buttons pressed
 
 		;if counter moved past 0 or 30, send 1000 HZ square wave to PE4 for some amount of time
@@ -70,6 +95,9 @@ start:
 	FINISH_NEGATIVE_SHIFT:
 		LSR R21
 		RJMP NEGATIVE_NOT_RELEASED
+	FINISH_TIMER_SHIFT:
+		LSR R21
+		RJMP TIMER_NOT_RELEASED
 
 .ORG 400
 INC_COUNT:
@@ -101,6 +129,55 @@ DELAY:  LDI R31, 10
 		BRNE a
 		RET
 
+.ORG 0x650
+VIKTOR_UPDATE_TIMER:; checks each main loop for whether a 0.02 second timer
+	IN R25, TIFR0
+	SBRC R25, TOV0; skip command if TOV0 is 0
+	RCALL VIKTOR_COMPLETE_TIMER; if TOV0, 0.02 second timer just completed
+	RET
+
+.ORG 0x675
+VIKTOR_COMPLETE_TIMER:; resolves a 0.02 second timer ending
+	DEC R4; decrement timer loop each time timer finishes
+	BRNE CONTINUE_TIMER_LOOP
+	; if 1 second timer loop not done, start timer again
+
+	RCALL VIKTOR_START_TIMER_LOOP; if 1 second timer loop reached 0, increment counter and start loop again
+	RCALL INC_COUNT
+	RET
+
+	CONTINUE_TIMER_LOOP:
+	RCALL VIKTOR_START_TIMER
+	RET
+
+.ORG 0x700
+VIKTOR_START_TIMER:; starts 0.02 second timer
+	LDI R25, 0b00000000
+	LDI R25, (1 << TOV0)
+	OUT TIFR0, R25; resets TOV0
+
+	OUT TCNT0, R2; loads pre-load timer value
+	LDI R25, 0b00000101
+	OUT TCCR0B, R25; configure timer to start with 1024 scale multiplier
+
+	RET
+
+.ORG 0x725
+VIKTOR_START_TIMER_LOOP:; starts 1 second timer loop
+	LDI R25, 50
+	MOV R4, R25; set loop counter to 100
+	LDI R25, 0xFF
+	MOV R3, R25; enable timer feature, causing update timer to be called in each main loop iteration
+	RCALL VIKTOR_START_TIMER; start 1st 0.02 second timer
+	RET
+
+.ORG 0x750
+VIKTOR_ENABLE_TIMER: ; call when timer first enabled with button toggle
+	RCALL INC_COUNT
+	;CALL DELAY; improve button press responsiveness
+	RCALL VIKTOR_START_TIMER_LOOP
+	RET
+	
 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
 ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
 ; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.
