@@ -75,6 +75,14 @@ start:
 		RCALL VIKTOR_ENABLE_TIMER; if timer just enabled, start timer loop
 		TIMER_NOT_RELEASED:
 
+		; Format to add new feature called featurename on the next available button - put the code here
+		LSR R20
+		BRLO FINISH_featurename_SHIFT
+		LSR R21
+		BRSH featurename_NOT_RELEASED
+		;RCALL FEATURE_x_subroutine - this call is skipped by the branch statements if the button was not just released
+		featurename_NOT_RELEASED:
+
 		; Update any timers
 		SBRC R3, 0; if timer not enabled (if R3 bit 0 is 0), skip
 		RCALL VIKTOR_UPDATE_TIMER; if timer enabled, update timer
@@ -98,6 +106,9 @@ start:
 	FINISH_TIMER_SHIFT:
 		LSR R21
 		RJMP TIMER_NOT_RELEASED
+	FINISH_featurename_SHIFT:
+		LSR R21
+		RJMP featurename_NOT_RELEASED
 
 .ORG 400
 INC_COUNT:
@@ -130,7 +141,7 @@ DEC_COUNT:
 SOUND_DELAY: ;for 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles: 250 * 32 = 8000
 	LDI R29, 250
 	repeat_1:
-	LDI R30, 31
+	LDI R30, 32
 	repeat_2:
 	DEC R30
 	BRNE repeat_2

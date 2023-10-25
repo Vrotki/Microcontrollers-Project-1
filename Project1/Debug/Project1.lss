@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Wed Oct 25 17:47:07 2023
+AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Wed Oct 25 18:24:46 2023
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
@@ -1668,7 +1668,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  		;monitor PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
 000018 9546                      		LSR R20; shifts positive key previous pressed to carry bit
-000019 f0c0                      		BRLO FINISH_POSITIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
+000019 f0e0                      		BRLO FINISH_POSITIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
                                  								  ; while INC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still
 00001a 9556                      		LSR R21; shifts positive key current pressed to carry bit
 00001b f410                      		BRSH POSITIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
@@ -1677,7 +1677,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  		;monitor PINA, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
 00001e 9546                      		LSR R20; shifts negative key previous pressed to carry bit
-00001f f0a0                      		BRLO FINISH_NEGATIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
+00001f f0c0                      		BRLO FINISH_NEGATIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
                                  								  ; while DEC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still shifted
 000020 9556                      		LSR R21; shifts negative key current pressed to carry bit
 000021 f410                      		BRSH NEGATIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
@@ -1687,7 +1687,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  		; Detect button releases for individual features
 000024 9546                      		LSR R20
-000025 f080                      		BRLO FINISH_TIMER_SHIFT; 
+000025 f0a0                      		BRLO FINISH_TIMER_SHIFT; 
 000026 9556                      		LSR R21
 000027 f418                      		BRSH TIMER_NOT_RELEASED
 000028 9430                      		COM R3; toggle timer enable
@@ -1695,29 +1695,40 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 00002a d2c3                      		RCALL VIKTOR_ENABLE_TIMER; if timer just enabled, start timer loop
                                  		TIMER_NOT_RELEASED:
                                  
-                                 		; Update any timers
-00002b fc30                      		SBRC R3, 0; if timer not enabled (if R3 bit 0 is 0), skip
-00002c d25d                      		RCALL VIKTOR_UPDATE_TIMER; if timer enabled, update timer
+                                 		; Format to add new feature called featurename on the next available button - put the code here
+00002b 9546                      		LSR R20
+00002c f078                      		BRLO FINISH_featurename_SHIFT
+00002d 9556                      		LSR R21
+00002e f400                      		BRSH featurename_NOT_RELEASED
+                                 		;RCALL FEATURE_x_subroutine - this call is skipped by the branch statements if the button was not just released
+                                 		featurename_NOT_RELEASED:
                                  
-00002d 2f23                      		MOV R18, R19; moves current buttons pressed to previous buttons pressed
+                                 		; Update any timers
+00002f fc30                      		SBRC R3, 0; if timer not enabled (if R3 bit 0 is 0), skip
+000030 d259                      		RCALL VIKTOR_UPDATE_TIMER; if timer enabled, update timer
+                                 
+000031 2f23                      		MOV R18, R19; moves current buttons pressed to previous buttons pressed
                                  
                                  		;if counter moved past 0 or 30, send 1000 HZ square wave to PE4 for some amount of time
                                  
                                  		;display LED's for 000xxxxx counter value by setting PORTD to complement of the counter value
-00002e 9500                      		COM R16
-00002f b90b                      		OUT PORTD, R16
-000030 9500                      		COM R16
+000032 9500                      		COM R16
+000033 b90b                      		OUT PORTD, R16
+000034 9500                      		COM R16
                                  
-000031 cfe3                      		RJMP MAIN_LOOP
+000035 cfdf                      		RJMP MAIN_LOOP
                                  	FINISH_POSITIVE_SHIFT:
-000032 9556                      		LSR R21
-000033 cfea                      		RJMP POSITIVE_NOT_RELEASED
-                                 	FINISH_NEGATIVE_SHIFT:
-000034 9556                      		LSR R21
-000035 cfee                      		RJMP NEGATIVE_NOT_RELEASED
-                                 	FINISH_TIMER_SHIFT:
 000036 9556                      		LSR R21
-000037 cff3                      		RJMP TIMER_NOT_RELEASED
+000037 cfe6                      		RJMP POSITIVE_NOT_RELEASED
+                                 	FINISH_NEGATIVE_SHIFT:
+000038 9556                      		LSR R21
+000039 cfea                      		RJMP NEGATIVE_NOT_RELEASED
+                                 	FINISH_TIMER_SHIFT:
+00003a 9556                      		LSR R21
+00003b cfef                      		RJMP TIMER_NOT_RELEASED
+                                 	FINISH_featurename_SHIFT:
+00003c 9556                      		LSR R21
+00003d cff1                      		RJMP featurename_NOT_RELEASED
                                  
                                  .ORG 400
                                  INC_COUNT:
@@ -1750,7 +1761,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  SOUND_DELAY: ;for 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles: 250 * 32 = 8000
 0001c2 efda                      	LDI R29, 250
                                  	repeat_1:
-0001c3 e1ef                      	LDI R30, 31
+0001c3 e2e0                      	LDI R30, 32
                                  	repeat_2:
 0001c4 95ea                      	DEC R30
 0001c5 f7f1                      	BRNE repeat_2
@@ -1857,8 +1868,8 @@ counted separately from r26..r31 here.
 "ATmega324PB" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   3 r3 :   5 r4 :   3 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  17 r17:   6 r18:   3 r19:   4 r20:   4 
-r21:   7 r22:   0 r23:   0 r24:   0 r25:  18 r26:   0 r27:   0 r28:   0 
+r13:   0 r14:   0 r15:   0 r16:  17 r17:   6 r18:   3 r19:   4 r20:   5 
+r21:   9 r22:   0 r23:   0 r24:   0 r25:  18 r26:   0 r27:   0 r28:   0 
 r29:   4 r30:   4 r31:   2 
 Registers used: 13 out of 35 (37.1%)
 
@@ -1866,17 +1877,17 @@ Registers used: 13 out of 35 (37.1%)
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
-brhs  :   0 brid  :   0 brie  :   0 brlo  :   3 brlt  :   0 brmi  :   0 
-brne  :   7 brpl  :   0 brsh  :   3 brtc  :   0 brts  :   0 brvc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   4 brlt  :   0 brmi  :   0 
+brne  :   7 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   4 cbi   :   2 cbr   :   0 
 clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   3 cp    :   0 cpc   :   0 
 cpi   :   0 cpse  :   0 dec   :   8 eor   :   0 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   1 jmp   :   0 
 ld    :   0 ldd   :   0 ldi   :  24 lds   :   0 lpm   :   0 lsl   :   0 
-lsr   :   9 mov   :   8 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+lsr   :  12 mov   :   8 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
 neg   :   0 nop   :   2 or    :   0 ori   :   0 out   :  10 pop   :   0 
-push  :   0 rcall :  13 ret   :  11 reti  :   0 rjmp  :   4 rol   :   0 
+push  :   0 rcall :  13 ret   :  11 reti  :   0 rjmp  :   5 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   2 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   7 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
@@ -1887,7 +1898,7 @@ Instructions used: 19 out of 113 (16.8%)
 "ATmega324PB" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0005e2    254      0    254   32768   0.8%
+[.cseg] 0x000000 0x0005e2    266      0    266   32768   0.8%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
