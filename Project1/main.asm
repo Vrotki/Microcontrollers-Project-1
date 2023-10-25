@@ -102,17 +102,56 @@ start:
 .ORG 400
 INC_COUNT:
 	INC R16
-	CALL DELAY
+	LDI R25, 32
+
+	SBRC R16, 5; if 32's place is 1, overflow just occurred
+	RCALL SOUND; if overflowed, play sound and return to 0
+
+	SBRC R16, 5
+	LDI R16, 0
+
+	CALL BUTTON_DELAY
+	RET
+
+.ORG 425
+DEC_COUNT:
+	DEC R16
+
+	SBRC R16, 7; if 128's place is 1, overflow just occurred
+	RCALL SOUND; if overflowed, play sound and return to 31
+
+	SBRC R16, 5
+	LDI R16, 31
+
+	CALL BUTTON_DELAY
+	RET
+
+.ORG 450
+SOUND_DELAY: ;for 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles: 250 * 32 = 8000
+	LDI R29, 250
+	repeat_1:
+	LDI R30, 31
+	repeat_2:
+	DEC R30
+	BRNE repeat_2
+	DEC R29
+	BRNE repeat_1
+	RET
+	
+.ORG 475
+SOUND:
+	LDI R25, 200
+	repeat_sound:
+	SBI PORTE, 4
+	RCALL SOUND_DELAY
+	CBI PORTE, 4
+	RCALL SOUND_DELAY
+	DEC R25
+	BRNE repeat_sound
 	RET
 
 .ORG 500
-DEC_COUNT:
-	DEC R16
-	CALL DELAY
-	RET
-
-.ORG 0x600
-DELAY:  LDI R31, 10
+BUTTON_DELAY:  LDI R31, 10
 	a:  LDI R30, 0xFF
 
 	b:  LDI R29, 0xFF
@@ -129,14 +168,14 @@ DELAY:  LDI R31, 10
 		BRNE a
 		RET
 
-.ORG 0x650
+.ORG 650
 VIKTOR_UPDATE_TIMER:; checks each main loop for whether a 0.02 second timer
 	IN R25, TIFR0
 	SBRC R25, TOV0; skip command if TOV0 is 0
 	RCALL VIKTOR_COMPLETE_TIMER; if TOV0, 0.02 second timer just completed
 	RET
 
-.ORG 0x675
+.ORG 675
 VIKTOR_COMPLETE_TIMER:; resolves a 0.02 second timer ending
 	DEC R4; decrement timer loop each time timer finishes
 	BRNE CONTINUE_TIMER_LOOP
@@ -150,7 +189,7 @@ VIKTOR_COMPLETE_TIMER:; resolves a 0.02 second timer ending
 	RCALL VIKTOR_START_TIMER
 	RET
 
-.ORG 0x700
+.ORG 700
 VIKTOR_START_TIMER:; starts 0.02 second timer
 	LDI R25, 0b00000000
 	LDI R25, (1 << TOV0)
@@ -162,22 +201,20 @@ VIKTOR_START_TIMER:; starts 0.02 second timer
 
 	RET
 
-.ORG 0x725
+.ORG 725
 VIKTOR_START_TIMER_LOOP:; starts 1 second timer loop
 	LDI R25, 50
-	MOV R4, R25; set loop counter to 100
+	MOV R4, R25; set loop counter to 50
 	LDI R25, 0xFF
 	MOV R3, R25; enable timer feature, causing update timer to be called in each main loop iteration
 	RCALL VIKTOR_START_TIMER; start 1st 0.02 second timer
 	RET
 
-.ORG 0x750
+.ORG 750
 VIKTOR_ENABLE_TIMER: ; call when timer first enabled with button toggle
 	RCALL INC_COUNT
-	;CALL DELAY; improve button press responsiveness
 	RCALL VIKTOR_START_TIMER_LOOP
 	RET
-	
 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
 ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
 ; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.
