@@ -138,8 +138,8 @@ DEC_COUNT:
 	RET
 
 .ORG 450
-SOUND_DELAY: ;for 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles: 250 * 32 = 8000
-	LDI R29, 250
+SOUND_DELAY: ;for 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles: 32 * 250 = 8000
+	LDI R29, 32 ;incorrect calculation - remember that each inner loop is more than 1 machine cycle
 	repeat_1:
 	LDI R30, 32
 	repeat_2:
