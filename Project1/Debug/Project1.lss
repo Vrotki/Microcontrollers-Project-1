@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Wed Oct 25 18:24:46 2023
+AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Thu Oct 26 17:02:29 2023
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
@@ -1631,29 +1631,29 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  	;LED's can be in 3x3 or 2x4 pattern, based on a switch on the board
                                  	; - if using 2x4, PD0 goes to LED1, PD1 goes to LED2, PD2 goes to LED3, PD3 goes to LED4B, and PD4 goes to LED6B
                                  
-000004 e000                      	LDI R16, 0; counter
-                                 	;configure PA0 and PA1 to take input from buttons, with pull-up enabled
-000005 e010                      	LDI R17, 0x00
-000006 b911                      	OUT DDRA, R17; set PA to input
-000007 ef1f                      	LDI R17, 0xFF
-000008 b912                      	OUT PORTA, R17; pull-up PA
+000004 e010                      	LDI R17, 0x00
+000005 b911                      	OUT DDRA, R17; set PA to input
+000006 ef1f                      	LDI R17, 0xFF
+000007 b912                      	OUT PORTA, R17; pull-up PA
                                  
-                                 	;configure PE4 to send output to speaker
-000009 9a6c                      	SBI DDRE, 4; set PE4 to output
-00000a 9874                      	CBI PORTE, 4; clear PE4
+                                 	; Configure PE4 to send output to speaker
+000008 9a6c                      	SBI DDRE, 4; set PE4 to output
+000009 9874                      	CBI PORTE, 4; clear PE4
                                  
-                                 	;configure all PD bits to send output to LED's
-00000b ef1f                      	LDI R17, 0b11111111
-00000c b91a                      	OUT DDRD, R17; set all PD bits to output
-00000d b90b                      	OUT PORTD, R16; set PORTD to initial count
+                                 	; Configure all PD bits to send output to LED's
+00000a ef1f                      	LDI R17, 0b11111111
+00000b b91a                      	OUT DDRD, R17; set all PD bits to output
+00000c b90b                      	OUT PORTD, R16; set PORTD to initial count
                                  
-00000e ef2f                      	LDI R18, 0b11111111; set previous buttons to not pressed
-00000f ef3f                      	LDI R19, 0b11111111; set current buttons to not pressed
+00000d ef2f                      	LDI R18, 0b11111111; Set previous buttons to not pressed
+00000e ef3f                      	LDI R19, 0b11111111; Set current buttons to not pressed
+                                 
+00000f e000                      	LDI R16, 0; initialize counter
                                  
                                  	; Configure registers for individual features
                                  
-                                 	;Viktor Butkovich individual feature - when the 3rd button is pressed, toggle a timer than, when activated, increments the counter by 1 every second
-                                 	;Feature requires timer 0, button SW3, and the R2, R3, and R4 registers, along with temporarily using the R25 register but not needing to keep any values stored there
+                                 	; Viktor Butkovich individual feature - when the 3rd button is pressed, toggle a timer than, when activated, increments the counter by 1 every second
+                                 	; Feature requires timer 0, button SW3, and the R2, R3, and R4 registers, along with temporarily using the R25 register but not needing to keep any values stored there
 000010 e893                      	LDI R25, -125; calculated that a delay of 0.02 seconds would require a 156.25 clock cycle timer - based on testing, 125 clock cycles achieves timing closer to the desired result
 000011 2c22                      	MOV R2, R2;
 000012 e090                      	LDI R25, 0
@@ -1662,27 +1662,27 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  	
                                  
                                  	MAIN_LOOP:
-000015 2f42                      		MOV R20, R18; copies previous buttons pressed values to R20 for comparison
-000016 b130                      		IN R19, PINA; set R19 to current buttons pressed
-000017 2f53                      		MOV R21, R19; copies current buttons pressed values to R21 for comparison
+000015 2f42                      		MOV R20, R18; Copies previous buttons pressed values to R20 for comparison
+000016 b130                      		IN R19, PINA; Sets R19 to current buttons pressed
+000017 2f53                      		MOV R21, R19; Copies current buttons pressed values to R21 for comparison
                                  
-                                 		;monitor PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
-000018 9546                      		LSR R20; shifts positive key previous pressed to carry bit
-000019 f0e0                      		BRLO FINISH_POSITIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
-                                 								  ; while INC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still
-00001a 9556                      		LSR R21; shifts positive key current pressed to carry bit
-00001b f410                      		BRSH POSITIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
-00001c 940e 0190                 		CALL INC_COUNT; increment if button was being pressed and is no longer being pressed
+                                 		; Monitors PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
+000018 9546                      		LSR R20; Shifts positive key previous pressed to carry bit
+000019 f0e0                      		BRLO FINISH_POSITIVE_SHIFT; Branches if c == 1 - skips if button was not being pressed
+                                 								  ; While INC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still
+00001a 9556                      		LSR R21; Shifts positive key current pressed to carry bit
+00001b f410                      		BRSH POSITIVE_NOT_RELEASED; Branches if c == 0 - skip if button is still being pressed
+00001c 940e 0190                 		CALL INC_COUNT; Increments if button was being pressed and is no longer being pressed
                                  		POSITIVE_NOT_RELEASED:
                                  
-                                 		;monitor PINA, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
-00001e 9546                      		LSR R20; shifts negative key previous pressed to carry bit
-00001f f0c0                      		BRLO FINISH_NEGATIVE_SHIFT; branch if c == 1 - skip if button was not being pressed
-                                 								  ; while DEC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still shifted
-000020 9556                      		LSR R21; shifts negative key current pressed to carry bit
-000021 f410                      		BRSH NEGATIVE_NOT_RELEASED; branch if c == 0 - skip if button is still being pressed
+                                 		; Monitors PINA, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
+00001e 9546                      		LSR R20; Shifts negative key previous pressed to carry bit
+00001f f0c0                      		BRLO FINISH_NEGATIVE_SHIFT; Branches if c == 1 - skip if button was not being pressed
+                                 								  ; While DEC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still shifted
+000020 9556                      		LSR R21; Shifts negative key current pressed to carry bit
+000021 f410                      		BRSH NEGATIVE_NOT_RELEASED; Branches if c == 0 - skip if button is still being pressed
                                  		
-000022 940e 01a9                 		CALL DEC_COUNT; decrement if button was being pressed and is no longer being pressed
+000022 940e 01a9                 		CALL DEC_COUNT; Decrements if button was being pressed and is no longer being pressed
                                  		NEGATIVE_NOT_RELEASED:
                                  
                                  		; Detect button releases for individual features
@@ -1690,9 +1690,9 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 000025 f0a0                      		BRLO FINISH_TIMER_SHIFT; 
 000026 9556                      		LSR R21
 000027 f418                      		BRSH TIMER_NOT_RELEASED
-000028 9430                      		COM R3; toggle timer enable
-000029 fc30                      		SBRC R3, 0; if timer not enabled (if R3 bit 0 is 0), skip
-00002a d2c3                      		RCALL VIKTOR_ENABLE_TIMER; if timer just enabled, start timer loop
+000028 9430                      		COM R3; Toggles timer enable
+000029 fc30                      		SBRC R3, 0; If timer not enabled (if R3 bit 0 is 0), skips
+00002a d2c3                      		RCALL VIKTOR_ENABLE_TIMER; If timer just enabled, starts timer loop
                                  		TIMER_NOT_RELEASED:
                                  
                                  		; Format to add new feature called featurename on the next available button - put the code here
@@ -1704,14 +1704,12 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  		featurename_NOT_RELEASED:
                                  
                                  		; Update any timers
-00002f fc30                      		SBRC R3, 0; if timer not enabled (if R3 bit 0 is 0), skip
-000030 d259                      		RCALL VIKTOR_UPDATE_TIMER; if timer enabled, update timer
+00002f fc30                      		SBRC R3, 0; If timer not enabled (if R3 bit 0 is 0), skip
+000030 d259                      		RCALL VIKTOR_UPDATE_TIMER; If timer enabled, update timer
                                  
-000031 2f23                      		MOV R18, R19; moves current buttons pressed to previous buttons pressed
+000031 2f23                      		MOV R18, R19; Moves current buttons pressed to previous buttons pressed
                                  
-                                 		;if counter moved past 0 or 30, send 1000 HZ square wave to PE4 for some amount of time
-                                 
-                                 		;display LED's for 000xxxxx counter value by setting PORTD to complement of the counter value
+                                 		; Display LED's for 000xxxxx counter value by setting PORTD to complement of the counter value
 000032 9500                      		COM R16
 000033 b90b                      		OUT PORTD, R16
 000034 9500                      		COM R16
@@ -1735,11 +1733,11 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 000190 9503                      	INC R16
 000191 e290                      	LDI R25, 32
                                  
-000192 fd05                      	SBRC R16, 5; if 32's place is 1, overflow just occurred
-000193 d047                      	RCALL SOUND; if overflowed, play sound and return to 0
+000192 fd05                      	SBRC R16, 5; If 32's place is 1, overflow just occurred
+000193 d047                      	RCALL SOUND; If overflowed, play sound
                                  
 000194 fd05                      	SBRC R16, 5
-000195 e000                      	LDI R16, 0
+000195 e000                      	LDI R16, 0; If overflowed, return counter to 0
                                  
 000196 940e 01f4                 	CALL BUTTON_DELAY
 000198 9508                      	RET
@@ -1748,20 +1746,21 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  DEC_COUNT:
 0001a9 950a                      	DEC R16
                                  
-0001aa fd07                      	SBRC R16, 7; if 128's place is 1, overflow just occurred
-0001ab d02f                      	RCALL SOUND; if overflowed, play sound and return to 31
+0001aa fd07                      	SBRC R16, 7; If 128's place is 1, overflow just occurred
+0001ab d02f                      	RCALL SOUND; If overflowed, play sound
                                  
-0001ac fd05                      	SBRC R16, 5
-0001ad e10f                      	LDI R16, 31
+0001ac fd05                      	SBRC R16, 5; If overflowed, return counter to 30
+0001ad e10e                      	LDI R16, 30
                                  
 0001ae 940e 01f4                 	CALL BUTTON_DELAY
 0001b0 9508                      	RET
                                  
                                  .ORG 450
-                                 SOUND_DELAY: ;for 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles: 250 * 32 = 8000
-0001c2 efda                      	LDI R29, 250
+                                 SOUND_DELAY: ; For 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles
+                                 			 ; 65 and 40 were calculated to result in 8002 machine cycles for each RCALL SOUND_DELAY
+0001c2 e4d1                      	LDI R29, 65
                                  	repeat_1:
-0001c3 e2e0                      	LDI R30, 32
+0001c3 e2e8                      	LDI R30, 40
                                  	repeat_2:
 0001c4 95ea                      	DEC R30
 0001c5 f7f1                      	BRNE repeat_2
@@ -1800,19 +1799,19 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0001ff 9508                      		RET
                                  
                                  .ORG 650
-                                 VIKTOR_UPDATE_TIMER:; checks each main loop for whether a 0.02 second timer
+                                 VIKTOR_UPDATE_TIMER:; Checks each main loop for whether a 0.02 second timer
 00028a b395                      	IN R25, TIFR0
-00028b fd90                      	SBRC R25, TOV0; skip command if TOV0 is 0
-00028c d016                      	RCALL VIKTOR_COMPLETE_TIMER; if TOV0, 0.02 second timer just completed
+00028b fd90                      	SBRC R25, TOV0; Skips command if TOV0 is 0
+00028c d016                      	RCALL VIKTOR_COMPLETE_TIMER; If TOV0 is 1, 0.02 second timer just completed
 00028d 9508                      	RET
                                  
                                  .ORG 675
-                                 VIKTOR_COMPLETE_TIMER:; resolves a 0.02 second timer ending
-0002a3 944a                      	DEC R4; decrement timer loop each time timer finishes
-0002a4 f419                      	BRNE CONTINUE_TIMER_LOOP
-                                 	; if 1 second timer loop not done, start timer again
+                                 VIKTOR_COMPLETE_TIMER:; Resolves a 0.02 second timer ending
+0002a3 944a                      	DEC R4; Decrements timer loop each time timer finishes
+0002a4 f419                      	BRNE CONTINUE_TIMER_LOOP; If 1 second timer loop not done, start timer again
+                                 	
                                  
-0002a5 d02f                      	RCALL VIKTOR_START_TIMER_LOOP; if 1 second timer loop reached 0, increment counter and start loop again
+0002a5 d02f                      	RCALL VIKTOR_START_TIMER_LOOP; If 1 second timer loop reached 0, increment counter and start loop again
 0002a6 dee9                      	RCALL INC_COUNT
 0002a7 9508                      	RET
                                  
@@ -1821,31 +1820,32 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0002a9 9508                      	RET
                                  
                                  .ORG 700
-                                 VIKTOR_START_TIMER:; starts 0.02 second timer
+                                 VIKTOR_START_TIMER:; Starts 0.02 second timer
 0002bc e090                      	LDI R25, 0b00000000
 0002bd e091                      	LDI R25, (1 << TOV0)
-0002be bb95                      	OUT TIFR0, R25; resets TOV0
+0002be bb95                      	OUT TIFR0, R25; Resets TOV0
                                  
-0002bf bc26                      	OUT TCNT0, R2; loads pre-load timer value
+0002bf bc26                      	OUT TCNT0, R2; Loads pre-load timer value
 0002c0 e095                      	LDI R25, 0b00000101
-0002c1 bd95                      	OUT TCCR0B, R25; configure timer to start with 1024 scale multiplier
+0002c1 bd95                      	OUT TCCR0B, R25; Configure timer to start with 1024 scale multiplier
                                  
 0002c2 9508                      	RET
                                  
                                  .ORG 725
-                                 VIKTOR_START_TIMER_LOOP:; starts 1 second timer loop
+                                 VIKTOR_START_TIMER_LOOP:; Starts 1 second timer loop
 0002d5 e392                      	LDI R25, 50
-0002d6 2e49                      	MOV R4, R25; set loop counter to 50
+0002d6 2e49                      	MOV R4, R25; Set loop counter to 50
 0002d7 ef9f                      	LDI R25, 0xFF
-0002d8 2e39                      	MOV R3, R25; enable timer feature, causing update timer to be called in each main loop iteration
-0002d9 dfe2                      	RCALL VIKTOR_START_TIMER; start 1st 0.02 second timer
+0002d8 2e39                      	MOV R3, R25; Enables timer feature, causing update timer to be called in each main loop iteration
+0002d9 dfe2                      	RCALL VIKTOR_START_TIMER; Starts 1st 0.02 second timer
 0002da 9508                      	RET
                                  
                                  .ORG 750
-                                 VIKTOR_ENABLE_TIMER: ; call when timer first enabled with button toggle
+                                 VIKTOR_ENABLE_TIMER:; Call when timer first enabled with button toggle
 0002ee dea1                      	RCALL INC_COUNT
 0002ef dfe5                      	RCALL VIKTOR_START_TIMER_LOOP
 0002f0 9508                      	RET
+                                 
                                  ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
                                  ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
                                  ; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.
