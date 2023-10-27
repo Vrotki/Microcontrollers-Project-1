@@ -46,7 +46,7 @@ start:
 		IN R19, PINA; Sets R19 to current buttons pressed
 		MOV R21, R19; Copies current buttons pressed values to R21 for comparison
 
-		; Monitors PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 30
+		; Monitors PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 31
 		LSR R20; Shifts positive key previous pressed to carry bit
 		BRLO FINISH_POSITIVE_SHIFT; Branches if c == 1 - skips if button was not being pressed
 								  ; While INC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still
@@ -55,7 +55,7 @@ start:
 		CALL INC_COUNT; Increments if button was being pressed and is no longer being pressed
 		POSITIVE_NOT_RELEASED:
 
-		; Monitors PINA, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 30 if passing 0
+		; Monitors PINA, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 31 if passing 0
 		LSR R20; Shifts negative key previous pressed to carry bit
 		BRLO FINISH_NEGATIVE_SHIFT; Branches if c == 1 - skip if button was not being pressed
 								  ; While DEC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still shifted
@@ -74,6 +74,20 @@ start:
 		SBRC R3, 0; If timer not enabled (if R3 bit 0 is 0), skips
 		RCALL VIKTOR_ENABLE_TIMER; If timer just enabled, starts timer loop
 		TIMER_NOT_RELEASED:
+
+		LSR R20
+		BRLO FINISH_DOUBLECOUNT_SHIFT
+		LSR R21
+		BRSH DOUBLECOUNT_NOT_RELEASED
+		RCALL SYDNEY_DOUBLECOUNT
+		DOUBLECOUNT_NOT_RELEASED:
+
+		LSR R20
+		BRLO FINISH_HALFCOUNT_SHIFT
+		LSR R21
+		BRSH HALFCOUNT_NOT_RELEASED
+		RCALL SYDNEY_HALFCOUNT
+		HALFCOUNT_NOT_RELEASED:
 
 		; Format to add new feature called featurename on the next available button - put the code here
 		LSR R20
@@ -104,35 +118,56 @@ start:
 	FINISH_TIMER_SHIFT:
 		LSR R21
 		RJMP TIMER_NOT_RELEASED
+	FINISH_DOUBLECOUNT_SHIFT:
+		LSR R21
+		RJMP DOUBLECOUNT_NOT_RELEASED
+	FINISH_HALFCOUNT_SHIFT:
+		LSR R21
+		RJMP HALFCOUNT_NOT_RELEASED
 	FINISH_featurename_SHIFT:
 		LSR R21
 		RJMP featurename_NOT_RELEASED
 
+.ORG 350
+CHECK_LOW_OVERFLOW:
+	SBRC R16, 7; If 128's place is 1, negative overflow just occurred
+	RCALL SOUND; If overflowed, play sound
+
+	SBRC R16, 7; If overflowed, return counter to 30
+	LDI R16, 30
+
+	RET
+
+.ORG 375
+CHECK_HIGH_OVERFLOW:
+	MOV R25, R16
+	LDI R29, 0b11100000
+	AND R25, R29
+	CPI R25, 0x00; If 128's, 64's, or 32's place is 1, counter is greater than 31 - positive overflow just occurred
+	BRNE resolve_high_overflow
+	MOV R25, R16
+	SUBI R25, 31
+	BREQ resolve_high_overflow; If counter equals 31, then counter is greater than 30 - positive overflow just occurred
+	RET
+
+	resolve_high_overflow:; If overflowed, subtract 31, play sound, and repeatedly overflow until counter is below 31
+	SUBI R16, 31
+	RCALL SOUND;
+	RJMP CHECK_HIGH_OVERFLOW;
+	RET
+
 .ORG 400
 INC_COUNT:
 	INC R16
-	LDI R25, 32
-
-	SBRC R16, 5; If 32's place is 1, overflow just occurred
-	RCALL SOUND; If overflowed, play sound
-
-	SBRC R16, 5
-	LDI R16, 0; If overflowed, return counter to 0
-
-	CALL BUTTON_DELAY
+	RCALL CHECK_HIGH_OVERFLOW
+	RCALL BUTTON_DELAY
 	RET
 
 .ORG 425
 DEC_COUNT:
 	DEC R16
-
-	SBRC R16, 7; If 128's place is 1, overflow just occurred
-	RCALL SOUND; If overflowed, play sound
-
-	SBRC R16, 5; If overflowed, return counter to 30
-	LDI R16, 30
-
-	CALL BUTTON_DELAY
+	RCALL CHECK_LOW_OVERFLOW
+	RCALL BUTTON_DELAY
 	RET
 
 .ORG 450
@@ -189,7 +224,6 @@ VIKTOR_UPDATE_TIMER:; Checks each main loop for whether a 0.02 second timer
 VIKTOR_COMPLETE_TIMER:; Resolves a 0.02 second timer ending
 	DEC R4; Decrements timer loop each time timer finishes
 	BRNE CONTINUE_TIMER_LOOP; If 1 second timer loop not done, start timer again
-	
 
 	RCALL VIKTOR_START_TIMER_LOOP; If 1 second timer loop reached 0, increment counter and start loop again
 	RCALL INC_COUNT
@@ -224,6 +258,21 @@ VIKTOR_START_TIMER_LOOP:; Starts 1 second timer loop
 VIKTOR_ENABLE_TIMER:; Call when timer first enabled with button toggle
 	RCALL INC_COUNT
 	RCALL VIKTOR_START_TIMER_LOOP
+	RET
+
+;Sydney - My individual feature is meant to double or half the count at a specific button
+.ORG 775
+SYDNEY_DOUBLECOUNT:
+	LSL R16 ; should multiply count by 2
+	RCALL CHECK_HIGH_OVERFLOW
+	CALL BUTTON_DELAY
+	RET
+
+;Sydney - half the count
+.ORG 800
+SYDNEY_HALFCOUNT:
+	LSR R16 ; should half the count, if odd rounds down 
+	RCALL BUTTON_DELAY
 	RET
 
 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
