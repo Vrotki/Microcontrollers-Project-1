@@ -89,6 +89,13 @@ start:
 		RCALL SYDNEY_HALFCOUNT
 		HALFCOUNT_NOT_RELEASED:
 
+		LSR R20
+		BRLO FINISH_BLINK_SHIFT
+		LSR R21
+		BRSH BLINK_NOT_RELEASED
+		RCALL JORGE_BLINK_TEST
+		BLINK_NOT_RELEASED:
+
 		; Format to add new feature called featurename on the next available button - put the code here
 		LSR R20
 		BRLO FINISH_featurename_SHIFT
@@ -124,6 +131,9 @@ start:
 	FINISH_HALFCOUNT_SHIFT:
 		LSR R21
 		RJMP HALFCOUNT_NOT_RELEASED
+	FINISH_BLINK_SHIFT:
+		LSR R21
+		RJMP BLINK_NOT_RELEASED
 	FINISH_featurename_SHIFT:
 		LSR R21
 		RJMP featurename_NOT_RELEASED
@@ -274,6 +284,30 @@ SYDNEY_HALFCOUNT:
 	LSR R16 ; should half the count, if odd rounds down 
 	RCALL BUTTON_DELAY
 	RET
+
+;Jorge - 'Lucky 7' When the counter is 7, LEDs should blink
+.ORG 825
+JORGE_BLINK_TEST:
+	MOV R28, R16
+	LDI R27, 0b00000111
+	CP R28, R27
+	BREQ JORGE_BLINK
+	RET
+
+.ORG 850
+JORGE_BLINK:
+	LDI R26, 0xFF
+	LDI R24, 0x00
+	OUT PORTD, R26
+	RCALL BUTTON_DELAY
+	OUT PORTD, R24
+	RCALL BUTTON_DELAY
+	OUT PORTD, R26
+	RCALL BUTTON_DELAY
+	OUT PORTD, R24
+	OUT PORTD, R16
+	RET
+
 
 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
 ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
