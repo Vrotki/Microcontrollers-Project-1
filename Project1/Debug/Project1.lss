@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Sat Oct 28 19:16:18 2023
+AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Sat Oct 28 19:34:31 2023
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
@@ -1648,8 +1648,8 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  	; Viktor Butkovich individual feature - when the 3rd button is pressed, toggle a timer than, when activated, increments the counter by 1 every second
                                  	; Feature requires timer 0, button SW3, and the R2, R3, and R4 registers, along with temporarily using the R25 register but not needing to keep any values stored there
-000010 e893                      	LDI R25, -125; calculated that a delay of 0.02 seconds would require a 156.25 clock cycle timer - based on testing, 125 clock cycles achieves timing closer to the desired result
-000011 2c22                      	MOV R2, R2;
+000010 e694                      	LDI R25, -156; calculated that a delay of 0.01 seconds would require a 156.25 clock cycle timer with a 1024 pre-scale multiplier
+000011 2e29                      	MOV R2, R25;
 000012 e090                      	LDI R25, 0
 000013 2e39                      	MOV R3, R25; timer feature enable - R3 is set to 0x00 is off, and 0xFF when it is on
 000014 2e49                      	MOV R4, R25; R4 is loop counter
@@ -1849,28 +1849,29 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  ; Viktor - My individual feature has a toggle button that uses a loop of asynchronous timers to increment the counter each second without blocking the rest of the program
                                  .ORG 650
-                                 VIKTOR_UPDATE_TIMER:; Called in each main loop if timer feature is enabled, checks for whether a 0.02 second timer just finished
+                                 VIKTOR_UPDATE_TIMER:; Called in each main loop if timer feature is enabled, checks for whether a 0.01 second timer just finished
 00028a b395                      	IN R25, TIFR0
 00028b fd90                      	SBRC R25, TOV0; Skips command if TOV0 is 0
-00028c d016                      	RCALL VIKTOR_COMPLETE_TIMER; If TOV0 is 1, 0.02 second timer just completed
+00028c d016                      	RCALL VIKTOR_COMPLETE_TIMER; If TOV0 is 1, 0.01 second timer just completed
 00028d 9508                      	RET
                                  
                                  .ORG 675
-                                 VIKTOR_COMPLETE_TIMER:; Called after a single 0.02 second timer finishes - either starts a new 0.02 second timer, or increments count and starts a new loop if the loop of
-                                 					  ;		50 0.02 second timers just finished
+                                 VIKTOR_COMPLETE_TIMER:; Called after a single 0.01 second timer finishes - either starts a new 0.01 second timer, or increments count and starts a new loop if the loop of
+                                 					  ;		100 0.01 second timers just finished
 0002a3 944a                      	DEC R4; Decrements timer loop each time timer finishes
-0002a4 f419                      	BRNE CONTINUE_TIMER_LOOP; If 1 second timer loop not done, start timer again
+0002a4 f421                      	BRNE CONTINUE_TIMER_LOOP; If 1 second timer loop not done, start timer again
                                  
 0002a5 d02f                      	RCALL VIKTOR_START_TIMER_LOOP; If 1 second timer loop reached 0, increment counter and start loop again
-0002a6 dee9                      	RCALL INC_COUNT
-0002a7 9508                      	RET
+0002a6 9503                      	INC R16
+0002a7 decf                      	RCALL CHECK_HIGH_OVERFLOW
+0002a8 9508                      	RET
                                  
                                  	CONTINUE_TIMER_LOOP:
-0002a8 d013                      	RCALL VIKTOR_START_TIMER
-0002a9 9508                      	RET
+0002a9 d012                      	RCALL VIKTOR_START_TIMER
+0002aa 9508                      	RET
                                  
                                  .ORG 700
-                                 VIKTOR_START_TIMER:; Called before starting a 0.02 second timer to configure timer 0
+                                 VIKTOR_START_TIMER:; Called before starting a 0.01 second timer to configure timer 0
 0002bc e090                      	LDI R25, 0b00000000
 0002bd e091                      	LDI R25, (1 << TOV0)
 0002be bb95                      	OUT TIFR0, R25; Resets TOV0
@@ -1882,12 +1883,12 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0002c2 9508                      	RET
                                  
                                  .ORG 725
-                                 VIKTOR_START_TIMER_LOOP:; Called when timer first enabled or when a previous loop finishes, starts a 1 second loop of 50 0.02 second timers
-0002d5 e392                      	LDI R25, 50
-0002d6 2e49                      	MOV R4, R25; Set loop counter to 50
+                                 VIKTOR_START_TIMER_LOOP:; Called when timer first enabled or when a previous loop finishes, starts a 1 second loop of 100 0.01 second timers
+0002d5 e694                      	LDI R25, 100
+0002d6 2e49                      	MOV R4, R25; Set loop counter to 100
 0002d7 ef9f                      	LDI R25, 0xFF
 0002d8 2e39                      	MOV R3, R25; Enables timer feature, causing update timer to be called in each main loop iteration
-0002d9 dfe2                      	RCALL VIKTOR_START_TIMER; Starts 1st 0.02 second timer
+0002d9 dfe2                      	RCALL VIKTOR_START_TIMER; Starts 1st 0.01 second timer
 0002da 9508                      	RET
                                  
                                  .ORG 750
@@ -1952,10 +1953,10 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega324PB" register use summary:
-x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   3 r3 :   5 r4 :   3 
+x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   2 r3 :   5 r4 :   3 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  23 r17:   6 r18:   3 r19:   4 r20:   8 
-r21:  15 r22:   0 r23:   0 r24:   3 r25:  22 r26:   3 r27:   0 r28:   0 
+r13:   0 r14:   0 r15:   0 r16:  24 r17:   6 r18:   3 r19:   4 r20:   8 
+r21:  15 r22:   0 r23:   0 r24:   3 r25:  23 r26:   3 r27:   0 r28:   0 
 r29:   6 r30:   4 r31:   2 
 Registers used: 15 out of 35 (42.9%)
 
@@ -1969,7 +1970,7 @@ brvs  :   0 bset  :   0 bst   :   0 call  :   3 cbi   :   2 cbr   :   0
 clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   5 cp    :   0 cpc   :   0 
 cpi   :   2 cpse  :   0 dec   :   8 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   1 jmp   :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   2 jmp   :   0 
 ld    :   0 ldd   :   0 ldi   :  25 lds   :   0 lpm   :   0 lsl   :   1 
 lsr   :  22 mov   :  10 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
 neg   :   0 nop   :   2 or    :   0 ori   :   0 out   :  15 pop   :   0 
@@ -1984,7 +1985,7 @@ Instructions used: 24 out of 113 (21.2%)
 "ATmega324PB" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0006c0    374      0    374   32768   1.1%
+[.cseg] 0x000000 0x0006c0    376      0    376   32768   1.1%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

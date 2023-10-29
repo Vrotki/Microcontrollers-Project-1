@@ -28,8 +28,8 @@ start:
 
 	; Viktor Butkovich individual feature - when the 3rd button is pressed, toggle a timer than, when activated, increments the counter by 1 every second
 	; Feature requires timer 0, button SW3, and the R2, R3, and R4 registers, along with temporarily using the R25 register but not needing to keep any values stored there
-	LDI R25, -125; calculated that a delay of 0.02 seconds would require a 156.25 clock cycle timer - based on testing, 125 clock cycles achieves timing closer to the desired result
-	MOV R2, R2;
+	LDI R25, -156; calculated that a delay of 0.01 seconds would require a 156.25 clock cycle timer with a 1024 pre-scale multiplier
+	MOV R2, R25;
 	LDI R25, 0
 	MOV R3, R25; timer feature enable - R3 is set to 0x00 is off, and 0xFF when it is on
 	MOV R4, R25; R4 is loop counter
@@ -229,20 +229,21 @@ BUTTON_DELAY:; Called by button handlers, briefly ignores further button input t
 
 ; Viktor - My individual feature has a toggle button that uses a loop of asynchronous timers to increment the counter each second without blocking the rest of the program
 .ORG 650
-VIKTOR_UPDATE_TIMER:; Called in each main loop if timer feature is enabled, checks for whether a 0.02 second timer just finished
+VIKTOR_UPDATE_TIMER:; Called in each main loop if timer feature is enabled, checks for whether a 0.01 second timer just finished
 	IN R25, TIFR0
 	SBRC R25, TOV0; Skips command if TOV0 is 0
-	RCALL VIKTOR_COMPLETE_TIMER; If TOV0 is 1, 0.02 second timer just completed
+	RCALL VIKTOR_COMPLETE_TIMER; If TOV0 is 1, 0.01 second timer just completed
 	RET
 
 .ORG 675
-VIKTOR_COMPLETE_TIMER:; Called after a single 0.02 second timer finishes - either starts a new 0.02 second timer, or increments count and starts a new loop if the loop of
-					  ;		50 0.02 second timers just finished
+VIKTOR_COMPLETE_TIMER:; Called after a single 0.01 second timer finishes - either starts a new 0.01 second timer, or increments count and starts a new loop if the loop of
+					  ;		100 0.01 second timers just finished
 	DEC R4; Decrements timer loop each time timer finishes
 	BRNE CONTINUE_TIMER_LOOP; If 1 second timer loop not done, start timer again
 
 	RCALL VIKTOR_START_TIMER_LOOP; If 1 second timer loop reached 0, increment counter and start loop again
-	RCALL INC_COUNT
+	INC R16
+	RCALL CHECK_HIGH_OVERFLOW
 	RET
 
 	CONTINUE_TIMER_LOOP:
@@ -250,7 +251,7 @@ VIKTOR_COMPLETE_TIMER:; Called after a single 0.02 second timer finishes - eithe
 	RET
 
 .ORG 700
-VIKTOR_START_TIMER:; Called before starting a 0.02 second timer to configure timer 0
+VIKTOR_START_TIMER:; Called before starting a 0.01 second timer to configure timer 0
 	LDI R25, 0b00000000
 	LDI R25, (1 << TOV0)
 	OUT TIFR0, R25; Resets TOV0
@@ -262,12 +263,12 @@ VIKTOR_START_TIMER:; Called before starting a 0.02 second timer to configure tim
 	RET
 
 .ORG 725
-VIKTOR_START_TIMER_LOOP:; Called when timer first enabled or when a previous loop finishes, starts a 1 second loop of 50 0.02 second timers
-	LDI R25, 50
-	MOV R4, R25; Set loop counter to 50
+VIKTOR_START_TIMER_LOOP:; Called when timer first enabled or when a previous loop finishes, starts a 1 second loop of 100 0.01 second timers
+	LDI R25, 100
+	MOV R4, R25; Set loop counter to 100
 	LDI R25, 0xFF
 	MOV R3, R25; Enables timer feature, causing update timer to be called in each main loop iteration
-	RCALL VIKTOR_START_TIMER; Starts 1st 0.02 second timer
+	RCALL VIKTOR_START_TIMER; Starts 1st 0.01 second timer
 	RET
 
 .ORG 750
