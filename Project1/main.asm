@@ -1,15 +1,9 @@
 start:
 	.ORG 0
-	LDI R16, HIGH(RAMEND);set up stack pointer
+	LDI R16, HIGH(RAMEND); Set up stack pointer
 	OUT SPH, R16
 	LDI R16, LOW(RAMEND)
 	OUT SPL, R16
-
-	;button 1 sends input to PA0, active low
-	;button 2 sends input to PA1, active low
-	;PE4 sends output to speaker, active high(?)
-	;LED's can be in 3x3 or 2x4 pattern, based on a switch on the board
-	; - if using 2x4, PD0 goes to LED1, PD1 goes to LED2, PD2 goes to LED3, PD3 goes to LED4B, and PD4 goes to LED6B
 
 	LDI R17, 0x00
 	OUT DDRA, R17; set PA to input
@@ -171,10 +165,9 @@ CHECK_HIGH_OVERFLOW:; Called after each increment - plays sound and subtracts 31
 	RET
 
 	resolve_high_overflow:; If overflowed, subtract 31, play sound, and repeatedly overflow until counter is below 31
-	SUBI R16, 31
 	RCALL SOUND;
+	SUBI R16, 31
 	RJMP CHECK_HIGH_OVERFLOW;
-	RET
 
 .ORG 400
 INC_COUNT:; Called to increment counter, while also checking for/resolving overflow and delaying to ignore button presses briefly after button released
@@ -301,9 +294,7 @@ SYDNEY_HALFCOUNT:
 ;Jorge - 'Lucky 7' When the counter is 7, LEDs should blink
 .ORG 825
 JORGE_BLINK_TEST:
-	MOV R28, R16
-	LDI R27, 0b00000111
-	CP R28, R27
+	CPI R16, 0b00000111
 	BREQ JORGE_BLINK
 	RET
 
@@ -318,10 +309,9 @@ JORGE_BLINK:
 	OUT PORTD, R26
 	RCALL BUTTON_DELAY
 	OUT PORTD, R24
+	RCALL BUTTON_DELAY
+	COM R16
 	OUT PORTD, R16
+	COM R16
 	RET
 
-
-; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
-; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
-; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.

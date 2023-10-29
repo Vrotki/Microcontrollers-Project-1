@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Fri Oct 27 00:37:36 2023
+AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Technology\Fall 2023\Microcontrollers and Embedded Systems\Microchip Studio\Microcontrollers-Project-1\Project1\main.asm Sat Oct 28 19:16:18 2023
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m324PBdef.inc'
@@ -1620,16 +1620,10 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
                                  
                                  
                                  	.ORG 0
-000000 e008                      	LDI R16, HIGH(RAMEND);set up stack pointer
+000000 e008                      	LDI R16, HIGH(RAMEND); Set up stack pointer
 000001 bf0e                      	OUT SPH, R16
 000002 ef0f                      	LDI R16, LOW(RAMEND)
 000003 bf0d                      	OUT SPL, R16
-                                 
-                                 	;button 1 sends input to PA0, active low
-                                 	;button 2 sends input to PA1, active low
-                                 	;PE4 sends output to speaker, active high(?)
-                                 	;LED's can be in 3x3 or 2x4 pattern, based on a switch on the board
-                                 	; - if using 2x4, PD0 goes to LED1, PD1 goes to LED2, PD2 goes to LED3, PD3 goes to LED4B, and PD4 goes to LED6B
                                  
 000004 e010                      	LDI R17, 0x00
 000005 b911                      	OUT DDRA, R17; set PA to input
@@ -1666,90 +1660,110 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 000016 b130                      		IN R19, PINA; Sets R19 to current buttons pressed
 000017 2f53                      		MOV R21, R19; Copies current buttons pressed values to R21 for comparison
                                  
-                                 		; Monitors PINA, 0 - if bit was 0 and is now 1, positive key was just released and the counter should be incremented, returning to 0 if passing 31
+                                 		; Detects SW1 release for increment- if PINA, 0 was 0 and is now 1, the positive key was just released and the counter should be incremented
 000018 9546                      		LSR R20; Shifts positive key previous pressed to carry bit
-000019 f130                      		BRLO FINISH_POSITIVE_SHIFT; Branches if c == 1 - skips if button was not being pressed
-                                 								  ; While INC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still
+000019 f158                      		BRLO FINISH_POSITIVE_SHIFT; Branches if c == 1 - skips if button was not being pressed
 00001a 9556                      		LSR R21; Shifts positive key current pressed to carry bit
 00001b f410                      		BRSH POSITIVE_NOT_RELEASED; Branches if c == 0 - skip if button is still being pressed
-00001c 940e 0190                 		CALL INC_COUNT; Increments if button was being pressed and is no longer being pressed
+                                 
+                                 		; All button press detections are in this format - any code in this middle section will run if the corresponding button was just released
+00001c 940e 0190                 		CALL INC_COUNT; Called if PA0 changed from 0 to 1
+                                 
                                  		POSITIVE_NOT_RELEASED:
                                  
-                                 		; Monitors PINA, 1 - if bit was 0 and is now 1, negative key was just released and the counter should be decremented, returning to 31 if passing 0
+                                 
+                                 		; Detects SW2 release for decrement
 00001e 9546                      		LSR R20; Shifts negative key previous pressed to carry bit
-00001f f110                      		BRLO FINISH_NEGATIVE_SHIFT; Branches if c == 1 - skip if button was not being pressed
+00001f f138                      		BRLO FINISH_NEGATIVE_SHIFT; Branches if c == 1 - skip if button was not being pressed
                                  								  ; While DEC_COUNT needs to be skipped, subsequent buttons will only work if R21 is still shifted
 000020 9556                      		LSR R21; Shifts negative key current pressed to carry bit
 000021 f410                      		BRSH NEGATIVE_NOT_RELEASED; Branches if c == 0 - skip if button is still being pressed
                                  		
-000022 940e 01a9                 		CALL DEC_COUNT; Decrements if button was being pressed and is no longer being pressed
+000022 940e 01a9                 		CALL DEC_COUNT; Called if PA1 changed from 0 to 1
                                  		NEGATIVE_NOT_RELEASED:
                                  
-                                 		; Detect button releases for individual features
+                                 		; Detects SW3 release for Viktor timer enable
 000024 9546                      		LSR R20
-000025 f0f0                      		BRLO FINISH_TIMER_SHIFT; 
+000025 f118                      		BRLO FINISH_TIMER_SHIFT; 
 000026 9556                      		LSR R21
 000027 f418                      		BRSH TIMER_NOT_RELEASED
+                                 		; Called if PA2 changed from 0 to 1
 000028 9430                      		COM R3; Toggles timer enable
 000029 fc30                      		SBRC R3, 0; If timer not enabled (if R3 bit 0 is 0), skips
 00002a d2c3                      		RCALL VIKTOR_ENABLE_TIMER; If timer just enabled, starts timer loop
                                  		TIMER_NOT_RELEASED:
                                  
+                                 		; Detects SW4 release for Sydney double count
 00002b 9546                      		LSR R20
-00002c f0c8                      		BRLO FINISH_DOUBLECOUNT_SHIFT
+00002c f0f0                      		BRLO FINISH_DOUBLECOUNT_SHIFT
 00002d 9556                      		LSR R21
 00002e f408                      		BRSH DOUBLECOUNT_NOT_RELEASED
-00002f d2d7                      		RCALL SYDNEY_DOUBLECOUNT
+00002f d2d7                      		RCALL SYDNEY_DOUBLECOUNT; Called if PA3 changed from 0 to 1
                                  		DOUBLECOUNT_NOT_RELEASED:
                                  
+                                 		; Detects SW6 release for Sydney double count (SW5 skipped, as its pin corresponds to PE6, and this button press detection relies on changes in the contents of PA)
 000030 9546                      		LSR R20
-000031 f0b0                      		BRLO FINISH_HALFCOUNT_SHIFT
+000031 f0d8                      		BRLO FINISH_HALFCOUNT_SHIFT
 000032 9556                      		LSR R21
 000033 f408                      		BRSH HALFCOUNT_NOT_RELEASED
-000034 d2eb                      		RCALL SYDNEY_HALFCOUNT
+000034 d2eb                      		RCALL SYDNEY_HALFCOUNT; Called if PA4 changed from 0 to 1
                                  		HALFCOUNT_NOT_RELEASED:
                                  
-                                 		; Format to add new feature called featurename on the next available button - put the code here
+                                 		; Detects SW7 release for Jorge blink shift
 000035 9546                      		LSR R20
-000036 f098                      		BRLO FINISH_featurename_SHIFT
+000036 f0c0                      		BRLO FINISH_BLINK_SHIFT
 000037 9556                      		LSR R21
-000038 f400                      		BRSH featurename_NOT_RELEASED
+000038 f408                      		BRSH BLINK_NOT_RELEASED
+000039 d2ff                      		RCALL JORGE_BLINK_TEST; Called if PA5 changed from 0 to 1
+                                 		BLINK_NOT_RELEASED:
+                                 
+                                 		; Format to add new feature called featurename on the next available button - put the code here
+00003a 9546                      		LSR R20
+00003b f0a8                      		BRLO FINISH_featurename_SHIFT
+00003c 9556                      		LSR R21
+00003d f400                      		BRSH featurename_NOT_RELEASED
                                  		;RCALL FEATURE_x_subroutine - this call is skipped by the branch statements if the button was not just released
                                  		featurename_NOT_RELEASED:
                                  
                                  		; Update any timers
-000039 fc30                      		SBRC R3, 0; If timer not enabled (if R3 bit 0 is 0), skip
-00003a d24f                      		RCALL VIKTOR_UPDATE_TIMER; If timer enabled, update timer
+00003e fc30                      		SBRC R3, 0; If timer not enabled (if R3 bit 0 is 0), skip
+00003f d24a                      		RCALL VIKTOR_UPDATE_TIMER; If timer enabled, update timer
                                  
-00003b 2f23                      		MOV R18, R19; Moves current buttons pressed to previous buttons pressed
+000040 2f23                      		MOV R18, R19; Moves current buttons pressed to previous buttons pressed
                                  
                                  		; Display LED's for 000xxxxx counter value by setting PORTD to complement of the counter value
-00003c 9500                      		COM R16
-00003d b90b                      		OUT PORTD, R16
-00003e 9500                      		COM R16
+000041 9500                      		COM R16
+000042 b90b                      		OUT PORTD, R16
+000043 9500                      		COM R16
                                  
-00003f cfd5                      		RJMP MAIN_LOOP
+000044 cfd0                      		RJMP MAIN_LOOP
+                                 
+                                 	; Both R20 and R21 need to shift for the previous and current status of the next button's PAx pin to be in bit position 0 - if branching to skip a section
+                                 	;	of code before both are shifted, the other needs to be shifted as well for subsequent buttons to be detected correctly
                                  	FINISH_POSITIVE_SHIFT:
-000040 9556                      		LSR R21
-000041 cfdc                      		RJMP POSITIVE_NOT_RELEASED
+000045 9556                      		LSR R21
+000046 cfd7                      		RJMP POSITIVE_NOT_RELEASED
                                  	FINISH_NEGATIVE_SHIFT:
-000042 9556                      		LSR R21
-000043 cfe0                      		RJMP NEGATIVE_NOT_RELEASED
+000047 9556                      		LSR R21
+000048 cfdb                      		RJMP NEGATIVE_NOT_RELEASED
                                  	FINISH_TIMER_SHIFT:
-000044 9556                      		LSR R21
-000045 cfe5                      		RJMP TIMER_NOT_RELEASED
+000049 9556                      		LSR R21
+00004a cfe0                      		RJMP TIMER_NOT_RELEASED
                                  	FINISH_DOUBLECOUNT_SHIFT:
-000046 9556                      		LSR R21
-000047 cfe8                      		RJMP DOUBLECOUNT_NOT_RELEASED
+00004b 9556                      		LSR R21
+00004c cfe3                      		RJMP DOUBLECOUNT_NOT_RELEASED
                                  	FINISH_HALFCOUNT_SHIFT:
-000048 9556                      		LSR R21
-000049 cfeb                      		RJMP HALFCOUNT_NOT_RELEASED
+00004d 9556                      		LSR R21
+00004e cfe6                      		RJMP HALFCOUNT_NOT_RELEASED
+                                 	FINISH_BLINK_SHIFT:
+00004f 9556                      		LSR R21
+000050 cfe9                      		RJMP BLINK_NOT_RELEASED
                                  	FINISH_featurename_SHIFT:
-00004a 9556                      		LSR R21
-00004b cfed                      		RJMP featurename_NOT_RELEASED
+000051 9556                      		LSR R21
+000052 cfeb                      		RJMP featurename_NOT_RELEASED
                                  
                                  .ORG 350
-                                 CHECK_LOW_OVERFLOW:
+                                 CHECK_LOW_OVERFLOW:; Called after each decrement - plays sound and returns counter to 30 if overflowed past 0
 00015e fd07                      	SBRC R16, 7; If 128's place is 1, negative overflow just occurred
 00015f d07b                      	RCALL SOUND; If overflowed, play sound
                                  
@@ -1759,7 +1773,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 000162 9508                      	RET
                                  
                                  .ORG 375
-                                 CHECK_HIGH_OVERFLOW:
+                                 CHECK_HIGH_OVERFLOW:; Called after each increment - plays sound and subtracts 31 until below 31 if overflowed past 30
 000177 2f90                      	MOV R25, R16
 000178 eed0                      	LDI R29, 0b11100000
 000179 239d                      	AND R25, R29
@@ -1771,28 +1785,27 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 00017f 9508                      	RET
                                  
                                  	resolve_high_overflow:; If overflowed, subtract 31, play sound, and repeatedly overflow until counter is below 31
-000180 510f                      	SUBI R16, 31
-000181 d059                      	RCALL SOUND;
+000180 d05a                      	RCALL SOUND;
+000181 510f                      	SUBI R16, 31
 000182 cff4                      	RJMP CHECK_HIGH_OVERFLOW;
-000183 9508                      	RET
                                  
                                  .ORG 400
-                                 INC_COUNT:
+                                 INC_COUNT:; Called to increment counter, while also checking for/resolving overflow and delaying to ignore button presses briefly after button released
 000190 9503                      	INC R16
 000191 dfe5                      	RCALL CHECK_HIGH_OVERFLOW
 000192 d061                      	RCALL BUTTON_DELAY
 000193 9508                      	RET
                                  
                                  .ORG 425
-                                 DEC_COUNT:
+                                 DEC_COUNT:; Called to decrement counter, while also checking for/resolving overflow and delaying to ignore button presses briefly after button released
 0001a9 950a                      	DEC R16
 0001aa dfb3                      	RCALL CHECK_LOW_OVERFLOW
 0001ab d048                      	RCALL BUTTON_DELAY
 0001ac 9508                      	RET
                                  
                                  .ORG 450
-                                 SOUND_DELAY: ; For 1000 HZ frequency, each half-wave should have a 0.5 ms delay, or about 8000 machine cycles
-                                 			 ; 65 and 40 were calculated to result in 8002 machine cycles for each RCALL SOUND_DELAY
+                                 SOUND_DELAY:; Creates the proper delay for a half wave of a ~1000 Hz frequency sound (0.5 ms delay -> 8000 machine cycles -> each RCALL SOUND_DELAY takes 8002 machine cycles)
+                                 	; 65 and 40 were calculated to result in 8002 machine cycles for each RCALL SOUND_DELAY
 0001c2 e4d1                      	LDI R29, 65
                                  	repeat_1:
 0001c3 e2e8                      	LDI R30, 40
@@ -1804,7 +1817,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0001c8 9508                      	RET
                                  	
                                  .ORG 475
-                                 SOUND:
+                                 SOUND:; Called when overflow occurs, repeats 200 waves of a ~1000 Hz frequency sound
 0001db ec98                      	LDI R25, 200
                                  	repeat_sound:
 0001dc 9a74                      	SBI PORTE, 4
@@ -1816,32 +1829,35 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0001e2 9508                      	RET
                                  
                                  .ORG 500
-0001f4 e0fa                      BUTTON_DELAY:  LDI R31, 10
-0001f5 efef                      	a:  LDI R30, 0xFF
+                                 BUTTON_DELAY:; Called by button handlers, briefly ignores further button input to avoid issue with button input pin incorrectly changing value while button is still held down
+0001f4 e0fa                      	LDI R31, 10
+0001f5 efef                      	button_delay_a:  LDI R30, 0xFF
                                  
-0001f6 efdf                      	b:  LDI R29, 0xFF
+0001f6 efdf                      	button_delay_b:  LDI R29, 0xFF
                                  
-0001f7 0000                      	c:  NOP
+0001f7 0000                      	button_delay_c:  NOP
 0001f8 0000                      		NOP
 0001f9 95da                      		DEC R29
-0001fa f7e1                      		BRNE c
+0001fa f7e1                      		BRNE button_delay_c
                                  
 0001fb 95ea                      		DEC R30
-0001fc f7c9                      		BRNE b 
+0001fc f7c9                      		BRNE button_delay_b 
                                  
 0001fd 95fa                      		DEC R31
-0001fe f7b1                      		BRNE a
+0001fe f7b1                      		BRNE button_delay_a
 0001ff 9508                      		RET
                                  
+                                 ; Viktor - My individual feature has a toggle button that uses a loop of asynchronous timers to increment the counter each second without blocking the rest of the program
                                  .ORG 650
-                                 VIKTOR_UPDATE_TIMER:; Checks each main loop for whether a 0.02 second timer
+                                 VIKTOR_UPDATE_TIMER:; Called in each main loop if timer feature is enabled, checks for whether a 0.02 second timer just finished
 00028a b395                      	IN R25, TIFR0
 00028b fd90                      	SBRC R25, TOV0; Skips command if TOV0 is 0
 00028c d016                      	RCALL VIKTOR_COMPLETE_TIMER; If TOV0 is 1, 0.02 second timer just completed
 00028d 9508                      	RET
                                  
                                  .ORG 675
-                                 VIKTOR_COMPLETE_TIMER:; Resolves a 0.02 second timer ending
+                                 VIKTOR_COMPLETE_TIMER:; Called after a single 0.02 second timer finishes - either starts a new 0.02 second timer, or increments count and starts a new loop if the loop of
+                                 					  ;		50 0.02 second timers just finished
 0002a3 944a                      	DEC R4; Decrements timer loop each time timer finishes
 0002a4 f419                      	BRNE CONTINUE_TIMER_LOOP; If 1 second timer loop not done, start timer again
                                  
@@ -1854,7 +1870,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0002a9 9508                      	RET
                                  
                                  .ORG 700
-                                 VIKTOR_START_TIMER:; Starts 0.02 second timer
+                                 VIKTOR_START_TIMER:; Called before starting a 0.02 second timer to configure timer 0
 0002bc e090                      	LDI R25, 0b00000000
 0002bd e091                      	LDI R25, (1 << TOV0)
 0002be bb95                      	OUT TIFR0, R25; Resets TOV0
@@ -1866,7 +1882,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0002c2 9508                      	RET
                                  
                                  .ORG 725
-                                 VIKTOR_START_TIMER_LOOP:; Starts 1 second timer loop
+                                 VIKTOR_START_TIMER_LOOP:; Called when timer first enabled or when a previous loop finishes, starts a 1 second loop of 50 0.02 second timers
 0002d5 e392                      	LDI R25, 50
 0002d6 2e49                      	MOV R4, R25; Set loop counter to 50
 0002d7 ef9f                      	LDI R25, 0xFF
@@ -1875,7 +1891,7 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 0002da 9508                      	RET
                                  
                                  .ORG 750
-                                 VIKTOR_ENABLE_TIMER:; Call when timer first enabled with button toggle
+                                 VIKTOR_ENABLE_TIMER:; Called when timer first enabled with button toggle, increments immediately to show responsiveness and starts the first 1 second timer loop
 0002ee dea1                      	RCALL INC_COUNT
 0002ef dfe5                      	RCALL VIKTOR_START_TIMER_LOOP
 0002f0 9508                      	RET
@@ -1895,9 +1911,30 @@ AVRASM ver. 2.2.8  C:\Users\vikto\OneDrive\Missouri University of Science and Te
 000321 ded2                      	RCALL BUTTON_DELAY
 000322 9508                      	RET
                                  
-                                 ; For your first project, you will design a simple, self-contained AVR-based device (Simon Board) that will, at a minimum, monitor two keys – one is a positive key that
-                                 ; increments the counter, and the other is a negative key that decrements the counter; display the current count in binary on a set of 5 LEDs; and sound an alarm when
-                                 ; the count “turns over” (cycles from a binary 30 to 0 or 0 to 30). The counter should be 0 initially.
+                                 ;Jorge - 'Lucky 7' When the counter is 7, LEDs should blink
+                                 .ORG 825
+                                 JORGE_BLINK_TEST:
+000339 3007                      	CPI R16, 0b00000111
+00033a f0b9                      	BREQ JORGE_BLINK
+00033b 9508                      	RET
+                                 
+                                 .ORG 850
+                                 JORGE_BLINK:
+000352 efaf                      	LDI R26, 0xFF
+000353 e080                      	LDI R24, 0x00
+000354 b9ab                      	OUT PORTD, R26
+000355 de9e                      	RCALL BUTTON_DELAY
+000356 b98b                      	OUT PORTD, R24
+000357 de9c                      	RCALL BUTTON_DELAY
+000358 b9ab                      	OUT PORTD, R26
+000359 de9a                      	RCALL BUTTON_DELAY
+00035a b98b                      	OUT PORTD, R24
+00035b de98                      	RCALL BUTTON_DELAY
+00035c 9500                      	COM R16
+00035d b90b                      	OUT PORTD, R16
+00035e 9500                      	COM R16
+00035f 9508                      	RET
+                                 
 
 
 RESOURCE USE INFORMATION
@@ -1917,26 +1954,26 @@ counted separately from r26..r31 here.
 "ATmega324PB" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   3 r3 :   5 r4 :   3 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  19 r17:   6 r18:   3 r19:   4 r20:   7 
-r21:  13 r22:   0 r23:   0 r24:   0 r25:  22 r26:   0 r27:   0 r28:   0 
+r13:   0 r14:   0 r15:   0 r16:  23 r17:   6 r18:   3 r19:   4 r20:   8 
+r21:  15 r22:   0 r23:   0 r24:   3 r25:  22 r26:   3 r27:   0 r28:   0 
 r29:   6 r30:   4 r31:   2 
-Registers used: 13 out of 35 (37.1%)
+Registers used: 15 out of 35 (42.9%)
 
 "ATmega324PB" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   1 
 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   1 brge  :   0 brhc  :   0 
-brhs  :   0 brid  :   0 brie  :   0 brlo  :   6 brlt  :   0 brmi  :   0 
-brne  :   8 brpl  :   0 brsh  :   6 brtc  :   0 brts  :   0 brvc  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   2 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   7 brlt  :   0 brmi  :   0 
+brne  :   8 brpl  :   0 brsh  :   7 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   3 cbi   :   2 cbr   :   0 
 clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   3 cp    :   0 cpc   :   0 
-cpi   :   1 cpse  :   0 dec   :   8 eor   :   0 fmul  :   0 fmuls :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   5 cp    :   0 cpc   :   0 
+cpi   :   2 cpse  :   0 dec   :   8 eor   :   0 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   1 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  23 lds   :   0 lpm   :   0 lsl   :   1 
-lsr   :  19 mov   :  10 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   2 or    :   0 ori   :   0 out   :  10 pop   :   0 
-push  :   0 rcall :  21 ret   :  16 reti  :   0 rjmp  :   8 rol   :   0 
+ld    :   0 ldd   :   0 ldi   :  25 lds   :   0 lpm   :   0 lsl   :   1 
+lsr   :  22 mov   :  10 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   2 or    :   0 ori   :   0 out   :  15 pop   :   0 
+push  :   0 rcall :  26 ret   :  17 reti  :   0 rjmp  :   9 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   2 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   5 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
@@ -1947,7 +1984,7 @@ Instructions used: 24 out of 113 (21.2%)
 "ATmega324PB" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000646    328      0    328   32768   1.0%
+[.cseg] 0x000000 0x0006c0    374      0    374   32768   1.1%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
