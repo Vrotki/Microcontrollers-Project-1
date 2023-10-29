@@ -33,7 +33,8 @@ start:
 	LDI R25, 0
 	MOV R3, R25; timer feature enable - R3 is set to 0x00 is off, and 0xFF when it is on
 	MOV R4, R25; R4 is loop counter
-	
+
+	LDI R28, 0xEE ;seed for Ryan Random Feature
 
 	MAIN_LOOP:
 		MOV R20, R18; Copies previous buttons pressed values to R20 for comparison
@@ -97,6 +98,14 @@ start:
 		RCALL JORGE_BLINK_TEST; Called if PA5 changed from 0 to 1
 		BLINK_NOT_RELEASED:
 
+		; Detects SW8 release for Ryan Random
+		LSR R20 
+		BRLO FINISH_RANDOM_SHIFT
+		LSR R21
+		BRSH RANDOM_NOT_RELEASED ;
+		RCALL RYAN_RANDOM ;called if PA6 changed from 0 to 1
+		RANDOM_NOT_RELEASED:
+
 		; Format to add new feature called featurename on the next available button - put the code here
 		LSR R20
 		BRLO FINISH_featurename_SHIFT
@@ -138,6 +147,9 @@ start:
 	FINISH_BLINK_SHIFT:
 		LSR R21
 		RJMP BLINK_NOT_RELEASED
+	FINISH_RANDOM_SHIFT:
+		LSR R21
+		RJMP RANDOM_NOT_RELEASED
 	FINISH_featurename_SHIFT:
 		LSR R21
 		RJMP featurename_NOT_RELEASED
@@ -315,4 +327,31 @@ JORGE_BLINK:
 	OUT PORTD, R16
 	COM R16
 	RET
+
+.ORG 875
+RYAN_RANDOM:
+	MOV R10, R28 ;get seed
+	CPI R28, 0x00
+	BREQ RYAN_NEW_SEED  ;if seed 0 get new seed
+	MUL R10, R10 ;multiply seed by itself
+	MOV R22, R1 
+	MOV R23, R0 
+	ANDI R22, 0x0F 
+	ANDI R23, 0xF0 
+	EOR R22, R23  ;get the middle values of the multiplication result
+	MOV R28, R22 ;set new seed
+	ANDI R22, 0b00011111 ;mask for LEDS
+	MOV R16, R22 ;Set register to random number for display
+	RET
+
+.ORG 900
+RYAN_NEW_SEED:
+	MOV R28, R16    ;move current count to seed
+	CPI R28, 0x00
+	BREQ END        ;If current count 0 end function
+	COM R28     ;complement seed since R16 will have at least 3 0s
+	RCALL RYAN_RANDOM  ;call ryan_random after getting a new seed
+END:
+	RET
+
 
