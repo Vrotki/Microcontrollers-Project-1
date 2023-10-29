@@ -33,6 +33,7 @@ start:
 	LDI R25, 0
 	MOV R3, R25; timer feature enable - R3 is set to 0x00 is off, and 0xFF when it is on
 	MOV R4, R25; R4 is loop counter
+	MOV R10, R25; sound increment enable
 
 	LDI R28, 0xEE ;seed for Ryan Random Feature
 
@@ -106,13 +107,13 @@ start:
 		RCALL RYAN_RANDOM ;called if PA6 changed from 0 to 1
 		RANDOM_NOT_RELEASED:
 
-		; Format to add new feature called featurename on the next available button - put the code here
+		; Detects SW9 release for Matthew sound increment
 		LSR R20
-		BRLO FINISH_featurename_SHIFT
-		LSR R21
-		BRSH featurename_NOT_RELEASED
-		;RCALL FEATURE_x_subroutine - this call is skipped by the branch statements if the button was not just released
-		featurename_NOT_RELEASED:
+        BRLO FINISH_SOUND_INCREMENT_SHIFT
+        LSR R21
+        BRSH sound_increment_NOT_RELEASED
+        COM R10; Called if PA7 changed from 0 to 1, toggles increment sound enable
+        sound_increment_NOT_RELEASED:
 
 		; Update any timers
 		SBRC R3, 0; If timer not enabled (if R3 bit 0 is 0), skip
@@ -150,9 +151,9 @@ start:
 	FINISH_RANDOM_SHIFT:
 		LSR R21
 		RJMP RANDOM_NOT_RELEASED
-	FINISH_featurename_SHIFT:
+	FINISH_SOUND_INCREMENT_SHIFT:
 		LSR R21
-		RJMP featurename_NOT_RELEASED
+		RJMP sound_increment_NOT_RELEASED
 
 .ORG 350
 CHECK_LOW_OVERFLOW:; Called after each decrement - plays sound and returns counter to 30 if overflowed past 0
@@ -186,6 +187,8 @@ INC_COUNT:; Called to increment counter, while also checking for/resolving overf
 	INC R16
 	RCALL CHECK_HIGH_OVERFLOW
 	RCALL BUTTON_DELAY
+	SBRC R10, 0; skip if sound increment not enabled
+	RCALL MATTHEW_SOUND_2
 	RET
 
 .ORG 425
@@ -255,6 +258,8 @@ VIKTOR_COMPLETE_TIMER:; Called after a single 0.01 second timer finishes - eithe
 
 	RCALL VIKTOR_START_TIMER_LOOP; If 1 second timer loop reached 0, increment counter and start loop again
 	INC R16
+	SBRC R10, 0; skip if sound increment not enabled
+	RCALL MATTHEW_SOUND_2
 	RCALL CHECK_HIGH_OVERFLOW
 	RET
 
@@ -286,6 +291,8 @@ VIKTOR_START_TIMER_LOOP:; Called when timer first enabled or when a previous loo
 .ORG 750
 VIKTOR_ENABLE_TIMER:; Called when timer first enabled with button toggle, increments immediately to show responsiveness and starts the first 1 second timer loop
 	RCALL INC_COUNT
+	SBRC R10, 0; skip if sound increment not enabled
+	RCALL MATTHEW_SOUND_2
 	RCALL VIKTOR_START_TIMER_LOOP
 	RET
 
@@ -307,6 +314,7 @@ SYDNEY_HALFCOUNT:
 ;Jorge - 'Lucky 7' When the counter is 7, LEDs should blink
 .ORG 825
 JORGE_BLINK_TEST:
+	RCALL INC_COUNT
 	CPI R16, 0b00000111
 	BREQ JORGE_BLINK
 	RET
@@ -342,6 +350,7 @@ RYAN_RANDOM:
 	MOV R28, R22 ;set new seed
 	ANDI R22, 0b00011111 ;mask for LEDS
 	MOV R16, R22 ;Set register to random number for display
+	RCALL BUTTON_DELAY
 	RET
 
 .ORG 900
@@ -353,5 +362,17 @@ RYAN_NEW_SEED:
 	RCALL RYAN_RANDOM  ;call ryan_random after getting a new seed
 END:
 	RET
+
+.ORG 925
+MATTHEW_SOUND_2:
+    LDI R25, 0xFF
+    repeat_sound_2:
+    SBI PORTE, 4
+    RCALL SOUND_DELAY
+    CBI PORTE, 4
+    RCALL SOUND_DELAY
+    DEC R25
+    BRNE repeat_sound_2
+    RET
 
 
