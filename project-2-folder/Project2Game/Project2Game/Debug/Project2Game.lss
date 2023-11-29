@@ -3,29 +3,29 @@ Project2Game.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000006  00800100  0000026c  000002e0  2**0
+  0 .data         0000000a  00800100  000002c6  0000033a  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000026c  00000000  00000000  00000074  2**1
+  1 .text         000002c6  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000002e6  2**0
+  2 .comment      00000030  00000000  00000000  00000344  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000318  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000374  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000058  00000000  00000000  00000358  2**0
+  4 .debug_aranges 00000058  00000000  00000000  000003b4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000be0  00000000  00000000  000003b0  2**0
+  5 .debug_info   00000c4d  00000000  00000000  0000040c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000a3c  00000000  00000000  00000f90  2**0
+  6 .debug_abbrev 00000a56  00000000  00000000  00001059  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000428  00000000  00000000  000019cc  2**0
+  7 .debug_line   00000470  00000000  00000000  00001aaf  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  000000c0  00000000  00000000  00001df4  2**2
+  8 .debug_frame  000000c8  00000000  00000000  00001f20  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000057f  00000000  00000000  00001eb4  2**0
+  9 .debug_str    00000631  00000000  00000000  00001fe8  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000012a  00000000  00000000  00002433  2**0
+ 10 .debug_loc    0000019d  00000000  00000000  00002619  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000048  00000000  00000000  0000255d  2**0
+ 11 .debug_ranges 00000048  00000000  00000000  000027b6  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -95,16 +95,16 @@ Disassembly of section .text:
   d8:	11 e0       	ldi	r17, 0x01	; 1
   da:	a0 e0       	ldi	r26, 0x00	; 0
   dc:	b1 e0       	ldi	r27, 0x01	; 1
-  de:	ec e6       	ldi	r30, 0x6C	; 108
+  de:	e6 ec       	ldi	r30, 0xC6	; 198
   e0:	f2 e0       	ldi	r31, 0x02	; 2
   e2:	02 c0       	rjmp	.+4      	; 0xe8 <__do_copy_data+0x10>
   e4:	05 90       	lpm	r0, Z+
   e6:	0d 92       	st	X+, r0
-  e8:	a6 30       	cpi	r26, 0x06	; 6
+  e8:	aa 30       	cpi	r26, 0x0A	; 10
   ea:	b1 07       	cpc	r27, r17
   ec:	d9 f7       	brne	.-10     	; 0xe4 <__do_copy_data+0xc>
-  ee:	0e 94 19 01 	call	0x232	; 0x232 <main>
-  f2:	0c 94 34 01 	jmp	0x268	; 0x268 <_exit>
+  ee:	0e 94 46 01 	call	0x28c	; 0x28c <main>
+  f2:	0c 94 61 01 	jmp	0x2c2	; 0x2c2 <_exit>
 
 000000f6 <__bad_interrupt>:
   f6:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -125,11 +125,11 @@ void timer1_stop(){
  106:	9f 93       	push	r25
  108:	10 92 85 00 	sts	0x0085, r1	; 0x800085 <__TEXT_REGION_LENGTH__+0x7f8085>
  10c:	10 92 84 00 	sts	0x0084, r1	; 0x800084 <__TEXT_REGION_LENGTH__+0x7f8084>
- 110:	80 91 04 01 	lds	r24, 0x0104	; 0x800104 <sec>
- 114:	90 91 05 01 	lds	r25, 0x0105	; 0x800105 <sec+0x1>
+ 110:	80 91 08 01 	lds	r24, 0x0108	; 0x800108 <sec>
+ 114:	90 91 09 01 	lds	r25, 0x0109	; 0x800109 <sec+0x1>
  118:	01 97       	sbiw	r24, 0x01	; 1
- 11a:	90 93 05 01 	sts	0x0105, r25	; 0x800105 <sec+0x1>
- 11e:	80 93 04 01 	sts	0x0104, r24	; 0x800104 <sec>
+ 11a:	90 93 09 01 	sts	0x0109, r25	; 0x800109 <sec+0x1>
+ 11e:	80 93 08 01 	sts	0x0108, r24	; 0x800108 <sec>
  122:	9f 91       	pop	r25
  124:	8f 91       	pop	r24
  126:	0f 90       	pop	r0
@@ -240,138 +240,193 @@ void sound(){
 }
 
 void check_buttons(){
- 1aa:	cf 93       	push	r28
- 1ac:	df 93       	push	r29
+ 1aa:	0f 93       	push	r16
+ 1ac:	1f 93       	push	r17
+ 1ae:	cf 93       	push	r28
+ 1b0:	df 93       	push	r29
 	current_buttons_pressed = PINA; // Get current button pressed values
- 1ae:	80 b1       	in	r24, 0x00	; 0
- 1b0:	90 e0       	ldi	r25, 0x00	; 0
- 1b2:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 1b6:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 1b2:	80 b1       	in	r24, 0x00	; 0
+ 1b4:	90 e0       	ldi	r25, 0x00	; 0
+ 1b6:	90 93 05 01 	sts	0x0105, r25	; 0x800105 <current_buttons_pressed+0x1>
+ 1ba:	80 93 04 01 	sts	0x0104, r24	; 0x800104 <current_buttons_pressed>
+	
 	for(int button_index = 0; button_index < 8; button_index++){
- 1ba:	c0 e0       	ldi	r28, 0x00	; 0
- 1bc:	d0 e0       	ldi	r29, 0x00	; 0
- 1be:	2b c0       	rjmp	.+86     	; 0x216 <check_buttons+0x6c>
+ 1be:	c0 e0       	ldi	r28, 0x00	; 0
+ 1c0:	d0 e0       	ldi	r29, 0x00	; 0
+ 1c2:	3a c0       	rjmp	.+116    	; 0x238 <check_buttons+0x8e>
 		bool previous_button_pressed = !((previous_buttons_pressed >> button_index) & 0b00000001); // Set to true if was pressed, false if was not pressed
- 1c0:	20 91 02 01 	lds	r18, 0x0102	; 0x800102 <previous_buttons_pressed>
- 1c4:	30 91 03 01 	lds	r19, 0x0103	; 0x800103 <previous_buttons_pressed+0x1>
- 1c8:	0c 2e       	mov	r0, r28
- 1ca:	02 c0       	rjmp	.+4      	; 0x1d0 <check_buttons+0x26>
- 1cc:	35 95       	asr	r19
- 1ce:	27 95       	ror	r18
- 1d0:	0a 94       	dec	r0
- 1d2:	e2 f7       	brpl	.-8      	; 0x1cc <check_buttons+0x22>
+ 1c4:	20 91 06 01 	lds	r18, 0x0106	; 0x800106 <previous_buttons_pressed>
+ 1c8:	30 91 07 01 	lds	r19, 0x0107	; 0x800107 <previous_buttons_pressed+0x1>
+ 1cc:	0c 2e       	mov	r0, r28
+ 1ce:	02 c0       	rjmp	.+4      	; 0x1d4 <check_buttons+0x2a>
+ 1d0:	35 95       	asr	r19
+ 1d2:	27 95       	ror	r18
+ 1d4:	0a 94       	dec	r0
+ 1d6:	e2 f7       	brpl	.-8      	; 0x1d0 <check_buttons+0x26>
 		bool current_button_pressed = !((current_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
- 1d4:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 1d8:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 1dc:	0c 2e       	mov	r0, r28
- 1de:	02 c0       	rjmp	.+4      	; 0x1e4 <check_buttons+0x3a>
- 1e0:	95 95       	asr	r25
- 1e2:	87 95       	ror	r24
- 1e4:	0a 94       	dec	r0
- 1e6:	e2 f7       	brpl	.-8      	; 0x1e0 <check_buttons+0x36>
- 1e8:	81 70       	andi	r24, 0x01	; 1
- 1ea:	99 27       	eor	r25, r25
+ 1d8:	80 91 04 01 	lds	r24, 0x0104	; 0x800104 <current_buttons_pressed>
+ 1dc:	90 91 05 01 	lds	r25, 0x0105	; 0x800105 <current_buttons_pressed+0x1>
+ 1e0:	0c 2e       	mov	r0, r28
+ 1e2:	02 c0       	rjmp	.+4      	; 0x1e8 <check_buttons+0x3e>
+ 1e4:	95 95       	asr	r25
+ 1e6:	87 95       	ror	r24
+ 1e8:	0a 94       	dec	r0
+ 1ea:	e2 f7       	brpl	.-8      	; 0x1e4 <check_buttons+0x3a>
+ 1ec:	81 70       	andi	r24, 0x01	; 1
+ 1ee:	99 27       	eor	r25, r25
 		if(previous_button_pressed && !current_button_pressed){
- 1ec:	20 fd       	sbrc	r18, 0
- 1ee:	12 c0       	rjmp	.+36     	; 0x214 <check_buttons+0x6a>
- 1f0:	89 2b       	or	r24, r25
- 1f2:	81 f0       	breq	.+32     	; 0x214 <check_buttons+0x6a>
+ 1f0:	20 fd       	sbrc	r18, 0
+ 1f2:	21 c0       	rjmp	.+66     	; 0x236 <check_buttons+0x8c>
+ 1f4:	89 2b       	or	r24, r25
+ 1f6:	f9 f0       	breq	.+62     	; 0x236 <check_buttons+0x8c>
 			switch(button_index){
- 1f4:	c1 30       	cpi	r28, 0x01	; 1
- 1f6:	d1 05       	cpc	r29, r1
- 1f8:	41 f0       	breq	.+16     	; 0x20a <check_buttons+0x60>
- 1fa:	c4 30       	cpi	r28, 0x04	; 4
- 1fc:	d1 05       	cpc	r29, r1
- 1fe:	41 f0       	breq	.+16     	; 0x210 <check_buttons+0x66>
+ 1f8:	c2 30       	cpi	r28, 0x02	; 2
+ 1fa:	d1 05       	cpc	r29, r1
+ 1fc:	a1 f0       	breq	.+40     	; 0x226 <check_buttons+0x7c>
+ 1fe:	34 f4       	brge	.+12     	; 0x20c <check_buttons+0x62>
  200:	20 97       	sbiw	r28, 0x00	; 0
- 202:	41 f4       	brne	.+16     	; 0x214 <check_buttons+0x6a>
-				case 0:
+ 202:	59 f0       	breq	.+22     	; 0x21a <check_buttons+0x70>
+ 204:	c1 30       	cpi	r28, 0x01	; 1
+ 206:	d1 05       	cpc	r29, r1
+ 208:	59 f0       	breq	.+22     	; 0x220 <check_buttons+0x76>
+ 20a:	15 c0       	rjmp	.+42     	; 0x236 <check_buttons+0x8c>
+ 20c:	c3 30       	cpi	r28, 0x03	; 3
+ 20e:	d1 05       	cpc	r29, r1
+ 210:	69 f0       	breq	.+26     	; 0x22c <check_buttons+0x82>
+ 212:	c4 30       	cpi	r28, 0x04	; 4
+ 214:	d1 05       	cpc	r29, r1
+ 216:	69 f0       	breq	.+26     	; 0x232 <check_buttons+0x88>
+ 218:	0e c0       	rjmp	.+28     	; 0x236 <check_buttons+0x8c>
+				case 0: // SW1
 				sound();
- 204:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
+ 21a:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
 				break;
- 208:	05 c0       	rjmp	.+10     	; 0x214 <check_buttons+0x6a>
-				case 1:
+ 21e:	0b c0       	rjmp	.+22     	; 0x236 <check_buttons+0x8c>
+				
+				case 1: // SW2
 				sound();
- 20a:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
+ 220:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
 				break;
- 20e:	02 c0       	rjmp	.+4      	; 0x214 <check_buttons+0x6a>
-				case 4:
+ 224:	08 c0       	rjmp	.+16     	; 0x236 <check_buttons+0x8c>
+				
+				case 2: // SW3
 				sound();
- 210:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
-	return;
+ 226:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
+				break;
+ 22a:	05 c0       	rjmp	.+10     	; 0x236 <check_buttons+0x8c>
+				
+				case 3: // SW4
+				sound();
+ 22c:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
+				break;
+ 230:	02 c0       	rjmp	.+4      	; 0x236 <check_buttons+0x8c>
+				
+				case 4: // SW6
+				sound();
+ 232:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
 }
 
 void check_buttons(){
 	current_buttons_pressed = PINA; // Get current button pressed values
+	
 	for(int button_index = 0; button_index < 8; button_index++){
- 214:	21 96       	adiw	r28, 0x01	; 1
- 216:	c8 30       	cpi	r28, 0x08	; 8
- 218:	d1 05       	cpc	r29, r1
- 21a:	94 f2       	brlt	.-92     	; 0x1c0 <check_buttons+0x16>
-				sound();
+ 236:	21 96       	adiw	r28, 0x01	; 1
+ 238:	c8 30       	cpi	r28, 0x08	; 8
+ 23a:	d1 05       	cpc	r29, r1
+ 23c:	1c f2       	brlt	.-122    	; 0x1c4 <check_buttons+0x1a>
+				case 7: //SW9
 				break;
 			}
 		}
 	}
 	previous_buttons_pressed = current_buttons_pressed;
- 21c:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 220:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 224:	90 93 03 01 	sts	0x0103, r25	; 0x800103 <previous_buttons_pressed+0x1>
- 228:	80 93 02 01 	sts	0x0102, r24	; 0x800102 <previous_buttons_pressed>
+ 23e:	80 91 04 01 	lds	r24, 0x0104	; 0x800104 <current_buttons_pressed>
+ 242:	90 91 05 01 	lds	r25, 0x0105	; 0x800105 <current_buttons_pressed+0x1>
+ 246:	90 93 07 01 	sts	0x0107, r25	; 0x800107 <previous_buttons_pressed+0x1>
+ 24a:	80 93 06 01 	sts	0x0106, r24	; 0x800106 <previous_buttons_pressed>
+	
+	current_E_buttons_pressed = PINE;
+ 24e:	8c b1       	in	r24, 0x0c	; 12
+ 250:	90 e0       	ldi	r25, 0x00	; 0
+ 252:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 256:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+	int button_index = 6;
+	bool previous_button_pressed = !((previous_E_buttons_pressed >> button_index) & 0b00000001); // Set to true if was pressed, false if was not pressed
+ 25a:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <previous_E_buttons_pressed>
+	bool current_button_pressed = !((current_E_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
+ 25e:	86 fb       	bst	r24, 6
+ 260:	00 27       	eor	r16, r16
+ 262:	00 f9       	bld	r16, 0
+ 264:	10 e0       	ldi	r17, 0x00	; 0
+	if(previous_button_pressed && !current_button_pressed){ // SW5
+ 266:	96 fd       	sbrc	r25, 6
+ 268:	04 c0       	rjmp	.+8      	; 0x272 <check_buttons+0xc8>
+ 26a:	01 2b       	or	r16, r17
+ 26c:	11 f0       	breq	.+4      	; 0x272 <check_buttons+0xc8>
+		sound();
+ 26e:	0e 94 c2 00 	call	0x184	; 0x184 <sound>
+	}
+	previous_E_buttons_pressed = current_E_buttons_pressed;
+ 272:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 276:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 27a:	90 93 03 01 	sts	0x0103, r25	; 0x800103 <previous_E_buttons_pressed+0x1>
+ 27e:	80 93 02 01 	sts	0x0102, r24	; 0x800102 <previous_E_buttons_pressed>
 }
- 22c:	df 91       	pop	r29
- 22e:	cf 91       	pop	r28
- 230:	08 95       	ret
+ 282:	df 91       	pop	r29
+ 284:	cf 91       	pop	r28
+ 286:	1f 91       	pop	r17
+ 288:	0f 91       	pop	r16
+ 28a:	08 95       	ret
 
-00000232 <main>:
+0000028c <main>:
 
 int main(void)
 {
 	DDRA = 0x00; // Configure all PA bits to receive input from buttons
- 232:	11 b8       	out	0x01, r1	; 1
+ 28c:	11 b8       	out	0x01, r1	; 1
 	PORTA = 0xFF; // Enable pull-up for PA
- 234:	9f ef       	ldi	r25, 0xFF	; 255
- 236:	92 b9       	out	0x02, r25	; 2
+ 28e:	9f ef       	ldi	r25, 0xFF	; 255
+ 290:	92 b9       	out	0x02, r25	; 2
 	
 	DDRE |= 0b00010000; // Set PE4 to send output to speaker
- 238:	8d b1       	in	r24, 0x0d	; 13
- 23a:	80 61       	ori	r24, 0x10	; 16
- 23c:	8d b9       	out	0x0d, r24	; 13
+ 292:	8d b1       	in	r24, 0x0d	; 13
+ 294:	80 61       	ori	r24, 0x10	; 16
+ 296:	8d b9       	out	0x0d, r24	; 13
 	PORTE &= 0b11101111; // Clear PE4
- 23e:	8e b1       	in	r24, 0x0e	; 14
- 240:	8f 7e       	andi	r24, 0xEF	; 239
- 242:	8e b9       	out	0x0e, r24	; 14
+ 298:	8e b1       	in	r24, 0x0e	; 14
+ 29a:	8f 7e       	andi	r24, 0xEF	; 239
+ 29c:	8e b9       	out	0x0e, r24	; 14
 	
 	DDRD = 0xFF; // Configure all PD bits to send output to LED's
- 244:	9a b9       	out	0x0a, r25	; 10
+ 29e:	9a b9       	out	0x0a, r25	; 10
 	PORTD = 0x00; // Clear PD (LEDs are on)
- 246:	1b b8       	out	0x0b, r1	; 11
+ 2a0:	1b b8       	out	0x0b, r1	; 11
 	
 	timer_init_ctc();
- 248:	0e 94 98 00 	call	0x130	; 0x130 <timer_init_ctc>
+ 2a2:	0e 94 98 00 	call	0x130	; 0x130 <timer_init_ctc>
 	sei();
- 24c:	78 94       	sei
+ 2a6:	78 94       	sei
 	timer1_start();
- 24e:	0e 94 b1 00 	call	0x162	; 0x162 <timer1_start>
+ 2a8:	0e 94 b1 00 	call	0x162	; 0x162 <timer1_start>
 	
     while (1) {
 		if(sec == 0){	// After 5 Seconds LEDs turn off
- 252:	80 91 04 01 	lds	r24, 0x0104	; 0x800104 <sec>
- 256:	90 91 05 01 	lds	r25, 0x0105	; 0x800105 <sec+0x1>
- 25a:	89 2b       	or	r24, r25
- 25c:	11 f4       	brne	.+4      	; 0x262 <main+0x30>
+ 2ac:	80 91 08 01 	lds	r24, 0x0108	; 0x800108 <sec>
+ 2b0:	90 91 09 01 	lds	r25, 0x0109	; 0x800109 <sec+0x1>
+ 2b4:	89 2b       	or	r24, r25
+ 2b6:	11 f4       	brne	.+4      	; 0x2bc <main+0x30>
 			PORTD = 0xFF;	// Set PD (LEDs are off)
- 25e:	8f ef       	ldi	r24, 0xFF	; 255
- 260:	8b b9       	out	0x0b, r24	; 11
+ 2b8:	8f ef       	ldi	r24, 0xFF	; 255
+ 2ba:	8b b9       	out	0x0b, r24	; 11
 			//sound();
 		}
 		check_buttons();
- 262:	0e 94 d5 00 	call	0x1aa	; 0x1aa <check_buttons>
+ 2bc:	0e 94 d5 00 	call	0x1aa	; 0x1aa <check_buttons>
     }
- 266:	f5 cf       	rjmp	.-22     	; 0x252 <main+0x20>
+ 2c0:	f5 cf       	rjmp	.-22     	; 0x2ac <main+0x20>
 
-00000268 <_exit>:
- 268:	f8 94       	cli
+000002c2 <_exit>:
+ 2c2:	f8 94       	cli
 
-0000026a <__stop_program>:
- 26a:	ff cf       	rjmp	.-2      	; 0x26a <__stop_program>
+000002c4 <__stop_program>:
+ 2c4:	ff cf       	rjmp	.-2      	; 0x2c4 <__stop_program>

@@ -14,6 +14,8 @@
 int sec = 5;
 int previous_buttons_pressed = 0b11111111; // Set previous buttons to not pressed
 int current_buttons_pressed = 0b11111111; // Set current buttons to not pressed
+int previous_E_buttons_pressed = 1; // Set previous PE5 to not pressed
+int current_E_buttons_pressed = 1; // Set current PE5 to not pressed
 
 ISR(TIMER1_COMPA_vect){		//Every Second the Interrupt Service Routine will be performed
 	TCNT1 = 0x00;
@@ -55,30 +57,53 @@ void sound_delay(){
 
 void check_buttons(){
 	current_buttons_pressed = PINA; // Get current button pressed values
+	
 	for(int button_index = 0; button_index < 8; button_index++){
 		bool previous_button_pressed = !((previous_buttons_pressed >> button_index) & 0b00000001); // Set to true if was pressed, false if was not pressed
 		bool current_button_pressed = !((current_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
 		if(previous_button_pressed && !current_button_pressed){
 			switch(button_index){
-				case 0:
+				case 0: // SW1
 				sound();
 				break;
-				case 1:
+				
+				case 1: // SW2
 				sound();
 				break;
-				case 2:
+				
+				case 2: // SW3
 				sound();
 				break;
-				case 3:
+				
+				case 3: // SW4
 				sound();
 				break;
-				case 4:
+				
+				case 4: // SW6
 				sound();
+				break;
+				
+				case 5: // SW7
+				break;
+				
+				case 6: // SW8
+				break;
+				
+				case 7: // SW9
 				break;
 			}
 		}
 	}
 	previous_buttons_pressed = current_buttons_pressed;
+	
+	current_E_buttons_pressed = PINE;
+	int button_index = 6;
+	bool previous_button_pressed = !((previous_E_buttons_pressed >> button_index) & 0b00000001); // Set to true if was pressed, false if was not pressed
+	bool current_button_pressed = !((current_E_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
+	if(previous_button_pressed && !current_button_pressed){ // SW5
+		sound();
+	}
+	previous_E_buttons_pressed = current_E_buttons_pressed;
 }
 
 int main(void)
