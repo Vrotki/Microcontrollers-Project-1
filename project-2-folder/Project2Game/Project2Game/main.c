@@ -9,13 +9,15 @@
 #include <avr/interrupt.h>
 #include <stdbool.h>
 #define F_CPU 16000000UL
-#include "util/delay.h"
 
-int sec = 5;
+int sec = 999;
 int previous_buttons_pressed = 0b11111111; // Set previous buttons to not pressed
 int current_buttons_pressed = 0b11111111; // Set current buttons to not pressed
 int previous_E_buttons_pressed = 1; // Set previous PE5 to not pressed
 int current_E_buttons_pressed = 1; // Set current PE5 to not pressed
+
+bool startup = true;
+bool game = false;
 
 ISR(TIMER1_COMPA_vect){		//Every Second the Interrupt Service Routine will be performed
 	TCNT1 = 0x00;
@@ -57,43 +59,39 @@ void sound_delay(){
 
 void check_buttons(){
 	current_buttons_pressed = PINA; // Get current button pressed values
-	
 	for(int button_index = 0; button_index < 8; button_index++){
 		bool previous_button_pressed = !((previous_buttons_pressed >> button_index) & 0b00000001); // Set to true if was pressed, false if was not pressed
 		bool current_button_pressed = !((current_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
 		if(previous_button_pressed && !current_button_pressed){
 			switch(button_index){
-				case 0: // SW1
+				case 0:
 				sound();
 				break;
-				
-				case 1: // SW2
+				case 1:
 				sound();
 				break;
-				
-				case 2: // SW3
+				case 2:
 				sound();
 				break;
-				
-				case 3: // SW4
+				case 3:
 				sound();
 				break;
-				
-				case 4: // SW6
+				case 4:
 				sound();
 				break;
-				
-				case 5: // SW7
+				case 5:
+				sound();
 				break;
-				
-				case 6: // SW8
+				case 6:
+				sound();
 				break;
-				
-				case 7: // SW9
+				case 7:
+				sound();
 				break;
 			}
 		}
 	}
+	
 	previous_buttons_pressed = current_buttons_pressed;
 	
 	current_E_buttons_pressed = PINE;
@@ -104,6 +102,30 @@ void check_buttons(){
 		sound();
 	}
 	previous_E_buttons_pressed = current_E_buttons_pressed;
+}
+
+void start_up(){
+	while(startup){
+		if(~PINA & (1<<PINA0)){			// If SW1 is pressed, start the game
+			while(~PINA & (1<<PINA0));
+			sec = 30;
+			PORTD = 0xFF; // Set PD (LEDs are off)
+			startup = false;
+			game = true;
+		}
+	}
+}
+
+void game_up(){
+    while (game) {
+	    check_buttons();
+
+	    if(sec == 0){	// After 30 Seconds, game is finished
+		    PORTD = 0x00;	// Clear PD (LEDs are on)
+		    sound();
+		    game = false;
+	    }
+    }
 }
 
 int main(void)
@@ -121,12 +143,8 @@ int main(void)
 	sei();
 	timer1_start();
 	
-    while (1) {
-		if(sec == 0){	// After 5 Seconds LEDs turn off
-			PORTD = 0xFF;	// Set PD (LEDs are off)
-			//sound();
-		}
-		check_buttons();
-    }
+	start_up();
+	
+	game_up();
 }
 
