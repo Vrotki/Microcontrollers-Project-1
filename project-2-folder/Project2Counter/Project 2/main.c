@@ -1,5 +1,4 @@
 #include <avr/io.h>
-#include <avr/interrupt.h>
 #include <stdbool.h>
 
 int count;
@@ -22,9 +21,9 @@ int main(void)
 		for(int button_index = 0; button_index < 8; button_index++){
 			bool previous_button_pressed = !((previous_buttons_pressed >> button_index) & 0b00000001); // Set to true if was pressed, false if was not pressed
 			bool current_button_pressed = !((current_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
-			if(previous_button_pressed && !current_button_pressed){
+			if(previous_button_pressed && !current_button_pressed){ // If button was pressed and is now released, call the corresponding button handling code
 				switch(button_index){
-					case 0: 
+					case 0:
 						inc_count();
 						break;
 					case 1:
@@ -59,33 +58,28 @@ void dec_count(){
 }
 
 void overflow_sound(){
-	for(int repeats = 0; repeats < 400; repeats++){
-		PORTE ^= 0b00010000;
-		sound_delay();
+	for(int repeats = 0; repeats < 800; repeats++){
+		PORTE ^= 0b00010000; // Repeatedly complement PE4 to create sound square wave
+		sound_delay(); // Delay to create 1000 Hz frequency
 	}
 	return;
 }
 
 void sound_delay(){
-	TCNT0 = 130; //125 * 64 = 8000
-	TCCR0B = 0b00000011; //64 timer pre-scale
-	while(!(TIFR0 << TOV0)){} //waits 8000 machine cycles for 1000 Hz half wave
+	TCNT0 = 130; // 125 * 64 = 8000, 255 - 125 = 130
+	TCCR0B = 0b00000011; // 64 timer pre-scale
+	while(!(TIFR0 << TOV0)){} // Wait 8000 machine cycles for 1000 Hz half wave
 	TCCR0B = 0;
-	TIFR0 = (1 << TOV0);
+	TIFR0 = (1 << TOV0); // Reset timer after completion
 	return;
 }
 
 void button_delay(){
-	//delay for calculated amount of time
-	for(int a = 0; a < 10; a++){
-		for(int b = 0; b < 255; b++){
-			for(int c = 0; c < 255; c++){
-				int delay = 10;
-				delay += 1;
-				delay += 1;
-			}
-		}
-	}
+	TCNT0 = 0; // 255 * 1024 = 261120
+	TCCR0B = 0b00000101; // 1024 timer pre-scale
+	while(!(TIFR0 << TOV0)){} // Wait 261120 machine cycles for button press
+	TCCR0B = 0;
+	TIFR0 = (1 << TOV0); // Reset timer after completion
 	return;
 }
 

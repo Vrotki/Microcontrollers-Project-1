@@ -3,31 +3,31 @@ Project 2.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  00000274  2**0
+  0 .data         00000000  00800100  00800100  00000290  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000200  00000000  00000000  00000074  2**1
+  1 .text         0000021c  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000002  00800100  00800100  00000274  2**0
+  2 .bss          00000002  00800100  00800100  00000290  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000274  2**0
+  3 .comment      00000030  00000000  00000000  00000290  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002a4  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002c0  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000048  00000000  00000000  000002e4  2**0
+  5 .debug_aranges 00000048  00000000  00000000  00000300  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00000c69  00000000  00000000  0000032c  2**0
+  6 .debug_info   00000c41  00000000  00000000  00000348  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000a41  00000000  00000000  00000f95  2**0
+  7 .debug_abbrev 00000a36  00000000  00000000  00000f89  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000419  00000000  00000000  000019d6  2**0
+  8 .debug_line   000003f9  00000000  00000000  000019bf  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000080  00000000  00000000  00001df0  2**2
+  9 .debug_frame  00000080  00000000  00000000  00001db8  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000005db  00000000  00000000  00001e70  2**0
+ 10 .debug_str    000005db  00000000  00000000  00001e38  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000001a1  00000000  00000000  0000244b  2**0
+ 11 .debug_loc    0000012d  00000000  00000000  00002413  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000068  00000000  00000000  000025ec  2**0
+ 12 .debug_ranges 00000038  00000000  00000000  00002540  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -106,8 +106,8 @@ Disassembly of section .text:
   e2:	a2 30       	cpi	r26, 0x02	; 2
   e4:	b2 07       	cpc	r27, r18
   e6:	e1 f7       	brne	.-8      	; 0xe0 <.do_clear_bss_loop>
-  e8:	0e 94 be 00 	call	0x17c	; 0x17c <main>
-  ec:	0c 94 fe 00 	jmp	0x1fc	; 0x1fc <_exit>
+  e8:	0e 94 cc 00 	call	0x198	; 0x198 <main>
+  ec:	0c 94 0c 01 	jmp	0x218	; 0x218 <_exit>
 
 000000f0 <__bad_interrupt>:
   f0:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -118,19 +118,19 @@ Disassembly of section .text:
 }
 
 void sound_delay(){
-	TCNT0 = 130; //125 * 64 = 8000
+	TCNT0 = 130; // 125 * 64 = 8000, 255 - 125 = 130
   f4:	82 e8       	ldi	r24, 0x82	; 130
   f6:	86 bd       	out	0x26, r24	; 38
-	TCCR0B = 0b00000011; //64 timer pre-scale
+	TCCR0B = 0b00000011; // 64 timer pre-scale
   f8:	83 e0       	ldi	r24, 0x03	; 3
   fa:	85 bd       	out	0x25, r24	; 37
-	while(!(TIFR0 << TOV0)){} //waits 8000 machine cycles for 1000 Hz half wave
+	while(!(TIFR0 << TOV0)){} // Wait 8000 machine cycles for 1000 Hz half wave
   fc:	85 b3       	in	r24, 0x15	; 21
   fe:	88 23       	and	r24, r24
  100:	e9 f3       	breq	.-6      	; 0xfc <sound_delay+0x8>
 	TCCR0B = 0;
  102:	15 bc       	out	0x25, r1	; 37
-	TIFR0 = (1 << TOV0);
+	TIFR0 = (1 << TOV0); // Reset timer after completion
  104:	81 e0       	ldi	r24, 0x01	; 1
  106:	85 bb       	out	0x15, r24	; 21
  108:	08 95       	ret
@@ -144,30 +144,30 @@ void sound_delay(){
 void overflow_sound(){
  10a:	cf 93       	push	r28
  10c:	df 93       	push	r29
-	for(int repeats = 0; repeats < 400; repeats++){
+	for(int repeats = 0; repeats < 800; repeats++){
  10e:	c0 e0       	ldi	r28, 0x00	; 0
  110:	d0 e0       	ldi	r29, 0x00	; 0
  112:	07 c0       	rjmp	.+14     	; 0x122 <overflow_sound+0x18>
-		PORTE ^= 0b00010000;
+		PORTE ^= 0b00010000; // Repeatedly complement PE4 to create sound square wave
  114:	9e b1       	in	r25, 0x0e	; 14
  116:	80 e1       	ldi	r24, 0x10	; 16
  118:	89 27       	eor	r24, r25
  11a:	8e b9       	out	0x0e, r24	; 14
-		sound_delay();
+		sound_delay(); // Delay to create 1000 Hz frequency
  11c:	0e 94 7a 00 	call	0xf4	; 0xf4 <sound_delay>
 	button_delay();
 	return;
 }
 
 void overflow_sound(){
-	for(int repeats = 0; repeats < 400; repeats++){
+	for(int repeats = 0; repeats < 800; repeats++){
  120:	21 96       	adiw	r28, 0x01	; 1
- 122:	c0 39       	cpi	r28, 0x90	; 144
- 124:	81 e0       	ldi	r24, 0x01	; 1
+ 122:	c0 32       	cpi	r28, 0x20	; 32
+ 124:	83 e0       	ldi	r24, 0x03	; 3
  126:	d8 07       	cpc	r29, r24
  128:	ac f3       	brlt	.-22     	; 0x114 <overflow_sound+0xa>
-		PORTE ^= 0b00010000;
-		sound_delay();
+		PORTE ^= 0b00010000; // Repeatedly complement PE4 to create sound square wave
+		sound_delay(); // Delay to create 1000 Hz frequency
 	}
 	return;
 }
@@ -175,171 +175,198 @@ void overflow_sound(){
  12c:	cf 91       	pop	r28
  12e:	08 95       	ret
 
-00000130 <inc_count>:
+00000130 <button_delay>:
+	TIFR0 = (1 << TOV0); // Reset timer after completion
+	return;
+}
+
+void button_delay(){
+	TCNT0 = 0; // 255 * 1024 = 261120
+ 130:	16 bc       	out	0x26, r1	; 38
+	TCCR0B = 0b00000101; // 1024 timer pre-scale
+ 132:	85 e0       	ldi	r24, 0x05	; 5
+ 134:	85 bd       	out	0x25, r24	; 37
+	while(!(TIFR0 << TOV0)){} // Wait 261120 machine cycles for button press
+ 136:	85 b3       	in	r24, 0x15	; 21
+ 138:	88 23       	and	r24, r24
+ 13a:	e9 f3       	breq	.-6      	; 0x136 <button_delay+0x6>
+	TCCR0B = 0;
+ 13c:	15 bc       	out	0x25, r1	; 37
+	TIFR0 = (1 << TOV0); // Reset timer after completion
+ 13e:	81 e0       	ldi	r24, 0x01	; 1
+ 140:	85 bb       	out	0x15, r24	; 21
+ 142:	08 95       	ret
+
+00000144 <inc_count>:
 		PORTD = count ^ 0xFF; // Output complement of counter to LED's
     }
 }
 
 void inc_count(){
 	count += 1;
- 130:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 134:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 138:	01 96       	adiw	r24, 0x01	; 1
- 13a:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 13e:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 144:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 148:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 14c:	01 96       	adiw	r24, 0x01	; 1
+ 14e:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 152:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
 	if(count > 30){
- 142:	4f 97       	sbiw	r24, 0x1f	; 31
- 144:	34 f0       	brlt	.+12     	; 0x152 <inc_count+0x22>
+ 156:	4f 97       	sbiw	r24, 0x1f	; 31
+ 158:	34 f0       	brlt	.+12     	; 0x166 <inc_count+0x22>
 		count = 0;
- 146:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 14a:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 15a:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 15e:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <__DATA_REGION_ORIGIN__>
 		overflow_sound();
- 14e:	0e 94 85 00 	call	0x10a	; 0x10a <overflow_sound>
- 152:	08 95       	ret
-
-00000154 <dec_count>:
+ 162:	0e 94 85 00 	call	0x10a	; 0x10a <overflow_sound>
+	}
 	button_delay();
+ 166:	0e 94 98 00 	call	0x130	; 0x130 <button_delay>
+ 16a:	08 95       	ret
+
+0000016c <dec_count>:
 	return;
 }
 
 void dec_count(){
 	count -= 1;
- 154:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 158:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 15c:	01 97       	sbiw	r24, 0x01	; 1
- 15e:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 162:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 16c:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 170:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 174:	01 97       	sbiw	r24, 0x01	; 1
+ 176:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 17a:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
 	if(count < 0){
- 166:	99 23       	and	r25, r25
- 168:	44 f4       	brge	.+16     	; 0x17a <dec_count+0x26>
+ 17e:	99 23       	and	r25, r25
+ 180:	44 f4       	brge	.+16     	; 0x192 <dec_count+0x26>
 		count = 30;
- 16a:	8e e1       	ldi	r24, 0x1E	; 30
- 16c:	90 e0       	ldi	r25, 0x00	; 0
- 16e:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 172:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 182:	8e e1       	ldi	r24, 0x1E	; 30
+ 184:	90 e0       	ldi	r25, 0x00	; 0
+ 186:	90 93 01 01 	sts	0x0101, r25	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 18a:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
 		overflow_sound();
- 176:	0e 94 85 00 	call	0x10a	; 0x10a <overflow_sound>
- 17a:	08 95       	ret
+ 18e:	0e 94 85 00 	call	0x10a	; 0x10a <overflow_sound>
+	}
+	button_delay();
+ 192:	0e 94 98 00 	call	0x130	; 0x130 <button_delay>
+ 196:	08 95       	ret
 
-0000017c <main>:
+00000198 <main>:
 
 int count;
 
 int main(void)
 {
 	count = 0;
- 17c:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 180:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 198:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 19c:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <__DATA_REGION_ORIGIN__>
 	int previous_buttons_pressed = 0b11111111; // Set previous buttons to not pressed
 	int current_buttons_pressed = 0b11111111; // Set current buttons to not pressed
 
 	DDRA = 0x00; // Configure all PA bits to receive input from buttons
- 184:	11 b8       	out	0x01, r1	; 1
+ 1a0:	11 b8       	out	0x01, r1	; 1
 	PORTA = 0xFF; // Enable pull-up for PA
- 186:	9f ef       	ldi	r25, 0xFF	; 255
- 188:	92 b9       	out	0x02, r25	; 2
+ 1a2:	9f ef       	ldi	r25, 0xFF	; 255
+ 1a4:	92 b9       	out	0x02, r25	; 2
 	DDRE |= 0b00010000; // Set PE4 to send output to speaker
- 18a:	8d b1       	in	r24, 0x0d	; 13
- 18c:	80 61       	ori	r24, 0x10	; 16
- 18e:	8d b9       	out	0x0d, r24	; 13
+ 1a6:	8d b1       	in	r24, 0x0d	; 13
+ 1a8:	80 61       	ori	r24, 0x10	; 16
+ 1aa:	8d b9       	out	0x0d, r24	; 13
 	PORTE &= 0b11101111; // Clear PE4
- 190:	8e b1       	in	r24, 0x0e	; 14
- 192:	8f 7e       	andi	r24, 0xEF	; 239
- 194:	8e b9       	out	0x0e, r24	; 14
+ 1ac:	8e b1       	in	r24, 0x0e	; 14
+ 1ae:	8f 7e       	andi	r24, 0xEF	; 239
+ 1b0:	8e b9       	out	0x0e, r24	; 14
 	DDRD = 0xFF; // Configure all PD bits to send output to LED's
- 196:	9a b9       	out	0x0a, r25	; 10
+ 1b2:	9a b9       	out	0x0a, r25	; 10
 int count;
 
 int main(void)
 {
 	count = 0;
 	int previous_buttons_pressed = 0b11111111; // Set previous buttons to not pressed
- 198:	ee 24       	eor	r14, r14
- 19a:	ea 94       	dec	r14
- 19c:	f1 2c       	mov	r15, r1
+ 1b4:	ee 24       	eor	r14, r14
+ 1b6:	ea 94       	dec	r14
+ 1b8:	f1 2c       	mov	r15, r1
 	PORTE &= 0b11101111; // Clear PE4
 	DDRD = 0xFF; // Configure all PD bits to send output to LED's
 
     while (1)
     {
 		current_buttons_pressed = PINA; // Get current button pressed values
- 19e:	00 b1       	in	r16, 0x00	; 0
- 1a0:	10 e0       	ldi	r17, 0x00	; 0
+ 1ba:	00 b1       	in	r16, 0x00	; 0
+ 1bc:	10 e0       	ldi	r17, 0x00	; 0
 		for(int button_index = 0; button_index < 8; button_index++){
- 1a2:	c0 e0       	ldi	r28, 0x00	; 0
- 1a4:	d0 e0       	ldi	r29, 0x00	; 0
- 1a6:	21 c0       	rjmp	.+66     	; 0x1ea <main+0x6e>
+ 1be:	c0 e0       	ldi	r28, 0x00	; 0
+ 1c0:	d0 e0       	ldi	r29, 0x00	; 0
+ 1c2:	21 c0       	rjmp	.+66     	; 0x206 <main+0x6e>
 			bool previous_button_pressed = !((previous_buttons_pressed >> button_index) & 0b00000001); // Set to true if was pressed, false if was not pressed
 			bool current_button_pressed = !((current_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
- 1a8:	c8 01       	movw	r24, r16
- 1aa:	0c 2e       	mov	r0, r28
- 1ac:	02 c0       	rjmp	.+4      	; 0x1b2 <main+0x36>
- 1ae:	95 95       	asr	r25
- 1b0:	87 95       	ror	r24
- 1b2:	0a 94       	dec	r0
- 1b4:	e2 f7       	brpl	.-8      	; 0x1ae <main+0x32>
- 1b6:	9c 01       	movw	r18, r24
- 1b8:	21 70       	andi	r18, 0x01	; 1
- 1ba:	33 27       	eor	r19, r19
-			if(previous_button_pressed && !current_button_pressed){
- 1bc:	c7 01       	movw	r24, r14
- 1be:	0c 2e       	mov	r0, r28
- 1c0:	02 c0       	rjmp	.+4      	; 0x1c6 <main+0x4a>
- 1c2:	95 95       	asr	r25
- 1c4:	87 95       	ror	r24
- 1c6:	0a 94       	dec	r0
- 1c8:	e2 f7       	brpl	.-8      	; 0x1c2 <main+0x46>
- 1ca:	80 fd       	sbrc	r24, 0
- 1cc:	0d c0       	rjmp	.+26     	; 0x1e8 <main+0x6c>
- 1ce:	23 2b       	or	r18, r19
- 1d0:	59 f0       	breq	.+22     	; 0x1e8 <main+0x6c>
+ 1c4:	c8 01       	movw	r24, r16
+ 1c6:	0c 2e       	mov	r0, r28
+ 1c8:	02 c0       	rjmp	.+4      	; 0x1ce <main+0x36>
+ 1ca:	95 95       	asr	r25
+ 1cc:	87 95       	ror	r24
+ 1ce:	0a 94       	dec	r0
+ 1d0:	e2 f7       	brpl	.-8      	; 0x1ca <main+0x32>
+ 1d2:	9c 01       	movw	r18, r24
+ 1d4:	21 70       	andi	r18, 0x01	; 1
+ 1d6:	33 27       	eor	r19, r19
+			if(previous_button_pressed && !current_button_pressed){ // If button was pressed and is now released, call the corresponding button handling code
+ 1d8:	c7 01       	movw	r24, r14
+ 1da:	0c 2e       	mov	r0, r28
+ 1dc:	02 c0       	rjmp	.+4      	; 0x1e2 <main+0x4a>
+ 1de:	95 95       	asr	r25
+ 1e0:	87 95       	ror	r24
+ 1e2:	0a 94       	dec	r0
+ 1e4:	e2 f7       	brpl	.-8      	; 0x1de <main+0x46>
+ 1e6:	80 fd       	sbrc	r24, 0
+ 1e8:	0d c0       	rjmp	.+26     	; 0x204 <main+0x6c>
+ 1ea:	23 2b       	or	r18, r19
+ 1ec:	59 f0       	breq	.+22     	; 0x204 <main+0x6c>
 				switch(button_index){
- 1d2:	20 97       	sbiw	r28, 0x00	; 0
- 1d4:	21 f0       	breq	.+8      	; 0x1de <main+0x62>
- 1d6:	c1 30       	cpi	r28, 0x01	; 1
- 1d8:	d1 05       	cpc	r29, r1
- 1da:	21 f0       	breq	.+8      	; 0x1e4 <main+0x68>
- 1dc:	05 c0       	rjmp	.+10     	; 0x1e8 <main+0x6c>
-					case 0: 
+ 1ee:	20 97       	sbiw	r28, 0x00	; 0
+ 1f0:	21 f0       	breq	.+8      	; 0x1fa <main+0x62>
+ 1f2:	c1 30       	cpi	r28, 0x01	; 1
+ 1f4:	d1 05       	cpc	r29, r1
+ 1f6:	21 f0       	breq	.+8      	; 0x200 <main+0x68>
+ 1f8:	05 c0       	rjmp	.+10     	; 0x204 <main+0x6c>
+					case 0:
 						inc_count();
- 1de:	0e 94 98 00 	call	0x130	; 0x130 <inc_count>
+ 1fa:	0e 94 a2 00 	call	0x144	; 0x144 <inc_count>
 						break;
- 1e2:	02 c0       	rjmp	.+4      	; 0x1e8 <main+0x6c>
+ 1fe:	02 c0       	rjmp	.+4      	; 0x204 <main+0x6c>
 					case 1:
 						dec_count();
- 1e4:	0e 94 aa 00 	call	0x154	; 0x154 <dec_count>
+ 200:	0e 94 b6 00 	call	0x16c	; 0x16c <dec_count>
 	DDRD = 0xFF; // Configure all PD bits to send output to LED's
 
     while (1)
     {
 		current_buttons_pressed = PINA; // Get current button pressed values
 		for(int button_index = 0; button_index < 8; button_index++){
- 1e8:	21 96       	adiw	r28, 0x01	; 1
- 1ea:	c8 30       	cpi	r28, 0x08	; 8
- 1ec:	d1 05       	cpc	r29, r1
- 1ee:	e4 f2       	brlt	.-72     	; 0x1a8 <main+0x2c>
+ 204:	21 96       	adiw	r28, 0x01	; 1
+ 206:	c8 30       	cpi	r28, 0x08	; 8
+ 208:	d1 05       	cpc	r29, r1
+ 20a:	e4 f2       	brlt	.-72     	; 0x1c4 <main+0x2c>
 						break;
 				}
 			}
 		}
 		previous_buttons_pressed = current_buttons_pressed;
 		PORTD = count ^ 0xFF; // Output complement of counter to LED's
- 1f0:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 1f4:	80 95       	com	r24
- 1f6:	8b b9       	out	0x0b, r24	; 11
+ 20c:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 210:	80 95       	com	r24
+ 212:	8b b9       	out	0x0b, r24	; 11
 						dec_count();
 						break;
 				}
 			}
 		}
 		previous_buttons_pressed = current_buttons_pressed;
- 1f8:	78 01       	movw	r14, r16
+ 214:	78 01       	movw	r14, r16
 		PORTD = count ^ 0xFF; // Output complement of counter to LED's
     }
- 1fa:	d1 cf       	rjmp	.-94     	; 0x19e <main+0x22>
+ 216:	d1 cf       	rjmp	.-94     	; 0x1ba <main+0x22>
 
-000001fc <_exit>:
- 1fc:	f8 94       	cli
+00000218 <_exit>:
+ 218:	f8 94       	cli
 
-000001fe <__stop_program>:
- 1fe:	ff cf       	rjmp	.-2      	; 0x1fe <__stop_program>
+0000021a <__stop_program>:
+ 21a:	ff cf       	rjmp	.-2      	; 0x21a <__stop_program>
