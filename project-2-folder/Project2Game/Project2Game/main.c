@@ -64,29 +64,33 @@ void check_buttons(){
 		bool current_button_pressed = !((current_buttons_pressed >> button_index) & 0b00000001); // Set to true if pressed, false if not pressed
 		if(previous_button_pressed && !current_button_pressed){
 			switch(button_index){
-				case 0:
+				case 0: // SW1
 				sound();
 				break;
-				case 1:
+				
+				case 1: // SW2
 				sound();
 				break;
-				case 2:
+				
+				case 2: // SW3
+				sound(); //test
+				break;
+				
+				case 3: // SW4
 				sound();
 				break;
-				case 3:
+				
+				case 4: // SW6
 				sound();
 				break;
-				case 4:
-				sound();
+				
+				case 5: // SW7
 				break;
-				case 5:
-				sound();
+				
+				case 6: // SW8
 				break;
-				case 6:
-				sound();
-				break;
-				case 7:
-				sound();
+				
+				case 7: // SW9
 				break;
 			}
 		}
