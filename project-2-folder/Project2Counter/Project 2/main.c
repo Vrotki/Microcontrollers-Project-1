@@ -30,7 +30,6 @@ int main(void)
 					case 1:
 						dec_count();
 						break;
-					// Add a new case statement corresponding with the button's input pin to implement any other buttons
 				}
 			}
 		}
@@ -41,17 +40,58 @@ int main(void)
 
 void inc_count(){
 	count += 1;
+	if(count > 30){
+		count = 0;
+		overflow_sound();
+	}
 	button_delay();
 	return;
 }
 
 void dec_count(){
 	count -= 1;
+	if(count < 0){
+		count = 30;
+		overflow_sound();
+	}
 	button_delay();
 	return;
 }
 
+void overflow_sound(){
+	for(int repeats = 40000; repeats > 0; repeats--){
+		PORTE ^= 0xFF;//0b00010000;
+		sound_delay();
+	}
+	
+	//makes a sound
+	//while(1){
+	for(int i = 0; i < 100; i++){
+		for(int repeats = 200000; repeats > 0; repeats--){
+			if(repeats == 2000){
+				PORTE ^= 0b00010000;
+			}
+		}
+	}
+	//}
+	return;
+}
+
+void sound_delay(){
+	for(int a = 0; a < 10; a++){
+		for(int b = 0; b < 255; b++){
+			for(int c = 0; c < 255; c++){
+				int delay = 10;
+				delay += 1;
+				delay += 1;
+			}
+		}
+	}
+	return;
+}
+
 void button_delay(){
+	//delay for calculated amount of time
 	for(int a = 0; a < 10; a++){
 		for(int b = 0; b < 255; b++){
 			for(int c = 0; c < 255; c++){
