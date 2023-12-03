@@ -122,7 +122,7 @@ void check_buttons(){
 }
 
 void start_game(){ // If SW1 is pressed during start mode, start the game
-	sec = 5;
+	sec = 5; // 30 second game is eventually planned, but 5 is easier for testing
 	PORTD = 0xFF; // Set PD (LEDs are off)
 	startup = false;
 	game = true;
