@@ -102,7 +102,7 @@ void gameplay(){
 			sound();
 		}
 		
-	    if(sec == 0){	// After 30 Seconds, game is finished
+	    if(sec <= 0){	// After 30 Seconds, game is finished
 		    PORTD = 0x00;	// Clear PD (LEDs are on)
 		    sound();
 		    game = false;
