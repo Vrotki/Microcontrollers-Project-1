@@ -7,6 +7,7 @@
 int sec = 0;
 int score = 0;
 int led = 0;
+int highscore = 0;
 
 bool startup = true;
 bool game = false;
@@ -74,6 +75,12 @@ void start_up(){
 	while(startup){
 		rand_seed++;
 		rand_seed %= 100000; // Random seed will be a pseudo-random number from 0-99999 based on how many loops occur before the game starts
+
+		//if user presses button for highscore
+		if(~PINE & (1<<PINE5)){
+			PORTD = highscore ^ 0xFF; //display highscore
+		}
+
 		if(~PINA & (1<<PINA0)){			// If SW1 is pressed, start the game
 			while(~PINA & (1<<PINA0));
 			srand(rand_seed);
@@ -109,6 +116,11 @@ void gameplay(){
 void game_over(){
 	timer1_stop();
 	PORTD = score ^ 0xFF; // Display score
+	//if score is higher than high score set highscore to new score
+	if (score > highscore)
+	{
+		highscore = score;
+	}
 	score = 0;
 	led = 0; // Reset LED to default value
 }
