@@ -8,11 +8,6 @@ int sec = 0;
 int score = 0;
 int led = 0;
 
-int previous_buttons_pressed = 0b11111111; // Set previous buttons to not pressed
-int current_buttons_pressed = 0b11111111; // Set current buttons to not pressed
-int previous_E_buttons_pressed = 0b11111111; // Set previous PE5 to not pressed
-int current_E_buttons_pressed = 0b11111111; // Set current PE5 to not pressed
-
 bool startup = true;
 bool game = false;
 bool gameover = false;
