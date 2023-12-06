@@ -51,8 +51,8 @@ void incorrect_sound(){
 
 //should delay for 500Hz sound
 void incorrect_sound_delay(){
-	TCNT0 = 56; //changed to align with 500 Hz
-	TCCR0B = 0b00000010; // 64 timer pre-scale
+	TCNT0 = 5; // 125 * 64 = 8000, 255 - 250 = 5
+	TCCR0B = 0b00000011; // 64 timer pre-scale
 	while(!(TIFR0 << TOV0)){} // Waits 8000 machine cycle
 	TCCR0B = 0;
 	TIFR0 = (1 << TOV0);
@@ -68,7 +68,7 @@ void sound(){
 }
 
 void sound_delay(){
-	TCNT0 = 130; // 125 * 64 = 8000
+	TCNT0 = 130; // 125 * 64 = 8000, 255 - 125 = 130
 	TCCR0B = 0b00000011; // 64 timer pre-scale
 	while(!(TIFR0 << TOV0)){} // Waits 8000 machine cycles for 1000 Hz half wave
 	TCCR0B = 0;

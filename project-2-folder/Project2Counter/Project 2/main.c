@@ -75,11 +75,13 @@ void sound_delay(){
 }
 
 void button_delay(){
-	TCNT0 = 0; // 255 * 1024 = 261120
-	TCCR0B = 0b00000101; // 1024 timer pre-scale
-	while(!(TIFR0 << TOV0)){} // Wait 261120 machine cycles for button press
-	TCCR0B = 0;
-	TIFR0 = (1 << TOV0); // Reset timer after completion
+	for(int i = 0; i < 10; i++) { // Repeat 10 times
+		TCNT0 = 0; // 255 * 1024 = 261120
+		TCCR0B = 0b00000101; // 1024 timer pre-scale
+		while(!(TIFR0 << TOV0)){} // Wait 261120 machine cycles for button press
+		TCCR0B = 0;
+		TIFR0 = (1 << TOV0); // Reset timer after completion
+	}
 	return;
 }
 
