@@ -93,9 +93,6 @@ void start_up(){
 	startup = true;
 	int rand_seed = 0;
 	
-	sound();
-	incorrect_sound();
-	sound(); //plays series of tones to start up game
 	
 	while(startup){
 		rand_seed++;
@@ -107,6 +104,11 @@ void start_up(){
 		}
 
 		if(~PINA & (1<<PINA0)){			// If SW1 is pressed, start the game
+		
+			sound();
+			incorrect_sound();
+			sound(); //plays series of tones to start up game
+
 			while(~PINA & (1<<PINA0));
 			srand(rand_seed);
 			sei();
