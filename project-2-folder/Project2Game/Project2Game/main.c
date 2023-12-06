@@ -39,6 +39,26 @@ void timer1_stop(){
 	TCCR1B &= ~( (1 << CS12) | (1 << CS11) | (1 << CS10));
 }
 
+
+//repeats are 1/2 for 500Hz
+void incorrect_sound(){
+	for(int repeats = 0; repeats < 200; repeats++){
+		PORTE ^= 0b00010000;
+		incorrect_sound_delay();
+	}
+	return;
+}
+
+//should delay for 500Hz sound
+void incorrect_sound_delay(){
+	TCNT0 = 56; //changed to align with 500 Hz
+	TCCR0B = 0b00000010; // 64 timer pre-scale
+	while(!(TIFR0 << TOV0)){} // Waits 8000 machine cycle
+	TCCR0B = 0;
+	TIFR0 = (1 << TOV0);
+	return;
+}
+
 void sound(){
 	for(int repeats = 0; repeats < 400; repeats++){
 		PORTE ^= 0b00010000;
@@ -72,6 +92,11 @@ int randomLED() {
 void start_up(){
 	startup = true;
 	int rand_seed = 0;
+	
+	sound();
+	incorrect_sound();
+	sound(); //plays series of tones to start up game
+	
 	while(startup){
 		rand_seed++;
 		rand_seed %= 100000; // Random seed will be a pseudo-random number from 0-99999 based on how many loops occur before the game starts
@@ -103,6 +128,10 @@ void gameplay(){
 			PORTD = 0xFF; // Set PD (LEDs are off)
 			sound();
 		}
+		else
+		{
+			incorrect_sound();
+		}
 		
 	    if(sec <= 0){	// After 30 Seconds, game is finished
 		    PORTD = 0x00;	// Clear PD (LEDs are on)
@@ -115,6 +144,11 @@ void gameplay(){
 
 void game_over(){
 	timer1_stop();
+	
+	incorrect_sound();
+	sound();
+	incorrect_sound(); //plays series of tones to end game
+	
 	PORTD = score ^ 0xFF; // Display score
 	//if score is higher than high score set highscore to new score
 	if (score > highscore)
