@@ -8,6 +8,7 @@ int sec = 0;
 int score = 0;
 int led = 0;
 int highscore = 0;
+int streak = 0;
 
 bool startup = true;
 bool game = false;
@@ -17,6 +18,9 @@ ISR(TIMER1_COMPA_vect){	// Every Second the Interrupt Service Routine will be pe
 	TCNT1 = 0x00;
 	
 	if(game){
+		if(led != -1){
+			streak = 0;
+		}
 		led = randomLED();
 		PORTD = 0xFF ^ (1 << led); // Turn on the corresponding LED       
 		sec--;
@@ -61,6 +65,24 @@ void incorrect_sound_delay(){
 
 void sound(){
 	for(int repeats = 0; repeats < 400; repeats++){
+		PORTE ^= 0b00010000;
+		sound_delay();
+	}
+	return;
+}
+
+void new_highscore_sound() {
+
+	for(int repeats = 0; repeats < 3000; repeats++){
+		PORTE ^= 0b00010000;
+		sound_delay();
+	}
+	return;
+
+}
+
+void streak_sound(){
+	for(int repeats = 0; repeats < 50; repeats++){
 		PORTE ^= 0b00010000;
 		sound_delay();
 	}
@@ -122,27 +144,43 @@ void start_up(){
 }
 
 void gameplay(){
-    while (game) {
-		if((~PINA & (1<<led)) && (led != -1)){			// If correct button is pressed, score += 1
+	while (game) {
+		if((~PINA & (1<<led)) && (led != -1)){            // If correct button is pressed, score += 1
 			while(~PINA & (1<<led));
+			streak += 1;
 			score += 1;
 			led = -1; // Prevent further scoring until new LED starts
 			PORTD = 0xFF; // Set PD (LEDs are off)
-			sound();
+			if(streak > 4)
+			{
+				for(int i = 0; i < streak; i++)
+				{
+					streak_sound();
+				}
+			}
+			else
+			{
+				sound();
+			}
+
 		}
 		else if((PINA | (0b00011000 | (1 << led))) != 0b11111111)//((PINA | 0b00011000) != 0b11111111) // If any incorrect LED button pressed, play incorrect sound
 		{
 			while((PINA | (0b00011000 | (1 << led))) != 0b11111111);
+			streak = 0;
 			incorrect_sound();
 		}
-		
+		if((~PINA & (1<<PINA3)) ){            // If correct button is pressed, score += 1
+			while(~PINA & (1<<PINA3));
+			return;
+		}
 	    if(sec <= 0){	// After 30 Seconds, game is finished
 		    PORTD = 0x00;	// Clear PD (LEDs are on)
 		    sound();
 		    game = false;
-			gameover = true;
+		    gameover = true;
 	    }
-    }
+	}
 }
 
 void game_over(){
@@ -157,6 +195,7 @@ void game_over(){
 	if (score > highscore)
 	{
 		highscore = score;
+		new_highscore_sound();
 	}
 	score = 0;
 	led = 0; // Reset LED to default value
