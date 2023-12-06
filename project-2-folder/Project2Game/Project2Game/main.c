@@ -99,7 +99,7 @@ void start_up(){
 		rand_seed %= 100000; // Random seed will be a pseudo-random number from 0-99999 based on how many loops occur before the game starts
 
 		//if user presses button for highscore
-		if(~PINE & (1<<PINE5)){
+		if(~PINE & (1<<PINE6)){
 			PORTD = highscore ^ 0xFF; //display highscore
 		}
 
@@ -130,8 +130,9 @@ void gameplay(){
 			PORTD = 0xFF; // Set PD (LEDs are off)
 			sound();
 		}
-		else
+		else if((PINA | (0b00011000 | (1 << led))) != 0b11111111)//((PINA | 0b00011000) != 0b11111111) // If any incorrect LED button pressed, play incorrect sound
 		{
+			while((PINA | (0b00011000 | (1 << led))) != 0b11111111);
 			incorrect_sound();
 		}
 		
@@ -165,10 +166,8 @@ int main(void) {
 	DDRA = 0x00; // Configure all PA bits to receive input from buttons
 	PORTA = 0xFF; // Enable pull-up for PA
 
-	DDRE &= ~(1 << PINE5);
-	PORTE |= (1 << PORTE5);
-	
-
+	DDRE &= ~(1 << PINE6); // Configure PE6 to receive input from SW5
+	PORTE |= (1 << PORTE6); // Enable pull-up for PE6
 	
 	DDRE |= 0b00010000; // Set PE4 to send output to speaker
 	PORTE &= 0b11101111; // Clear PE4
@@ -176,7 +175,6 @@ int main(void) {
 	DDRD = 0xFF; // Configure all PD bits to send output to LED's
 	PORTD = 0x00; // Clear PD (LEDs are on)
 
-	
 	timer_init_ctc();
 	
 	while(1){
