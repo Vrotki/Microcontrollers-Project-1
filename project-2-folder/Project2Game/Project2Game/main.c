@@ -164,12 +164,18 @@ void game_over(){
 int main(void) {
 	DDRA = 0x00; // Configure all PA bits to receive input from buttons
 	PORTA = 0xFF; // Enable pull-up for PA
+
+	DDRE &= ~(1 << PINE5);
+	PORTE |= (1 << PORTE5);
+	
+
 	
 	DDRE |= 0b00010000; // Set PE4 to send output to speaker
 	PORTE &= 0b11101111; // Clear PE4
 	
 	DDRD = 0xFF; // Configure all PD bits to send output to LED's
 	PORTD = 0x00; // Clear PD (LEDs are on)
+
 	
 	timer_init_ctc();
 	
